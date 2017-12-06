@@ -19,7 +19,7 @@ java -jar L01.1.1-maven/target/gt-lecture1.jar
 ### L02.1-memory
 ```bash
 mvn package
-java -Xmx2014m -Xms1024m -jar L02.1-memory\target\gt-lecture2.jar
+java -Xmx2014m -Xms1024m -jar L02.1-memory/target/gt-lecture2.jar
 ```
 
 
