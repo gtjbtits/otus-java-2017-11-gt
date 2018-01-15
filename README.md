@@ -22,4 +22,9 @@ mvn package
 java -Xmx2014m -Xms1024m -jar L02.1-memory/target/gt-lecture2.jar
 ```
 
+### L06
+```bash
+mvn test
+```
+
 
