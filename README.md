@@ -27,4 +27,9 @@ java -Xmx2014m -Xms1024m -jar L02.1-memory/target/gt-lecture2.jar
 mvn test
 ```
 
+### L08
+```bash
+mvn test
+```
+
 
