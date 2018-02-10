@@ -1,5 +1,6 @@
 package com.jbtits.otus.lecture8;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import org.junit.Before;
@@ -9,6 +10,7 @@ import java.io.IOException;
 import java.util.*;
 
 import static junit.framework.TestCase.assertTrue;
+import static org.junit.Assert.assertEquals;
 
 public class JsonSerializerTest {
     private JsonSerializer serializer;
@@ -80,5 +82,33 @@ public class JsonSerializerTest {
         System.out.println(json);
         Bag dBag = deserialize(json, Bag.class);
         assertTrue(dBag.equals(bag));
+    }
+
+    @Test
+    public void canSerializeNull() throws JsonProcessingException {
+        String jacksonJson = mapper.writeValueAsString(null);
+        String myJson = serializer.toJson(null);
+        assertEquals(jacksonJson, myJson);
+    }
+
+    @Test
+    public void canSerializeInt() throws JsonProcessingException {
+        String jacksonJson = mapper.writeValueAsString(123);
+        String myJson = serializer.toJson(123);
+        assertEquals(jacksonJson, myJson);
+    }
+
+    @Test
+    public void canSerializeString() throws JsonProcessingException {
+        String jacksonJson = mapper.writeValueAsString("abc");
+        String myJson = serializer.toJson("abc");
+        assertEquals(jacksonJson, myJson);
+    }
+
+    @Test
+    public void canSerializeBoolean() throws JsonProcessingException {
+        String jacksonJson = mapper.writeValueAsString(false);
+        String myJson = serializer.toJson(false);
+        assertEquals(jacksonJson, myJson);
     }
 }
