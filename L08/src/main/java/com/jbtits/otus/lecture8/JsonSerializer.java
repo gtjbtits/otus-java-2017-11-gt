@@ -119,17 +119,13 @@ public class JsonSerializer {
         return entry;
     }
 
-    private JSONAware attachJSONPrimitive(JSONAware entry, Object source, String key) {
-        return attachJSONValue(entry, source, key);
-    }
-
     private JSONAware buildTree(JSONAware entry, Object source, String key) {
         defineContext(entry, source);
         if (sourceContext == SourceContext.PRIMITIVE || sourceContext == SourceContext.NULL) {
             if (entryContext == EntryContext.NULL) {
                 entry = new JSONPrimitive(source);
             } else {
-                entry = attachJSONPrimitive(entry, source, key);
+                entry = attachJSONValue(entry, source, key);
             }
         } else if (sourceContext == SourceContext.ARRAY || sourceContext == SourceContext.ITERABLE) {
             entry = attachJSONArray(entry, source, key);
