@@ -37,8 +37,10 @@ public class Executor {
         }
     }
 
-    public <T extends DataSet> void save(T user) {
-        String preparedInsert = "insert into " + getTableName(user.getClass()) + " (name, age) values(?, ?)";
+    public <T extends DataSet> void save(T dataSet) {
+        String preparedInsert = "insert into users (name, age) values(?, ?)";
+        StatementGenerator stmtGenerator = new StatementGenerator();
+        System.out.println(stmtGenerator.generateInsert(dataSet));
         execUpdate(preparedInsert, stmt -> {
             stmt.setString(1, "John");
             stmt.setInt(2, 10);
@@ -48,7 +50,7 @@ public class Executor {
     }
 
     public <T extends DataSet> T load(long id, Class<T> clazz) {
-        String preparedSelect = "select id, name, age from " + getTableName(clazz) + " where id = ?";
+        String preparedSelect = "select id, name, age from users where id = ?";
         execQuery(preparedSelect, stmt -> {
             stmt.setLong(1,1);
             System.out.println(stmt.toString());
@@ -62,11 +64,5 @@ public class Executor {
             System.out.println(names);
         });
         return null;
-    }
-
-    private <T extends DataSet> String getTableName(Class<T> clazz) {
-        String className = clazz.getSimpleName();
-        int dataSetLength = DataSet.class.getSimpleName().length();
-        return className.substring(0, className.length() - dataSetLength).toLowerCase() + "s";
     }
 }
