@@ -1,4 +1,4 @@
-package com.jbtits.otus.lecture9.db;
+package com.jbtits.otus.lecture9.executor;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

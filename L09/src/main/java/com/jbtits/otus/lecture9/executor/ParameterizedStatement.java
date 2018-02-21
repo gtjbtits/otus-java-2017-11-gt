@@ -3,6 +3,14 @@ package com.jbtits.otus.lecture9.executor;
 import java.util.List;
 
 public class ParameterizedStatement {
+    public String getStmt() {
+        return stmt;
+    }
+
+    public List<?> getParams() {
+        return params;
+    }
+
     private String stmt;
     private List<?> params;
 

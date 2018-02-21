@@ -6,9 +6,9 @@ import java.sql.SQLException;
 
 public interface DBService extends AutoCloseable {
 
-    void prepareTables() throws SQLException;
+    void prepareTables();
 
-    void saveUser(UserDataSet user) throws SQLException;
+    void saveUser(UserDataSet user);
 
     UserDataSet getUserById(long id);
 
