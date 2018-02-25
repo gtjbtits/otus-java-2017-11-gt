@@ -20,6 +20,10 @@
             <artifactId>h2</artifactId>
             <version>1.4.196</version>
         </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+        </dependency>
     </dependencies>
-    <!-- create table users (id bigint(20) not null auto_increment, name varchar(255), age int(3)); -->
 </project>

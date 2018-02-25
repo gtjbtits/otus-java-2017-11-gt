@@ -1,16 +1,16 @@
 package com.jbtits.otus.lecture9.service;
 
+import com.jbtits.otus.lecture9.entity.DataSet;
 import com.jbtits.otus.lecture9.entity.UserDataSet;
 
+import javax.xml.crypto.Data;
 import java.sql.SQLException;
 
 public interface DBService extends AutoCloseable {
 
-    void prepareTables();
+    <T extends DataSet> void save(T dataSet);
 
-    void saveUser(UserDataSet user);
-
-    UserDataSet getUserById(long id);
+    <T extends DataSet> T getById(long id, Class<T> clazz);
 
     void shutdown();
 }

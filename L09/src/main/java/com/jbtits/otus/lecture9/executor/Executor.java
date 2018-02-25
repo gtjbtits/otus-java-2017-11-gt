@@ -5,19 +5,24 @@ import com.jbtits.otus.lecture9.entity.DataSet;
 import java.sql.*;
 
 public class Executor {
-    public Connection getConnection() {
+    protected Connection getConnection() {
         return connection;
     }
 
     private final Connection connection;
+    private StatementFactory statementFactory;
+    private ResultHandler resultHandler;
 
     public Executor(Connection connection) {
         this.connection = connection;
+        statementFactory = new StatementFactory();
+        resultHandler = new ResultHandler();
     }
 
-    private <T extends DataSet> T execQuery(String query, ExecuteHandler prepare, TResultHandler<T> handler) {
+    private <T extends DataSet> T execQuery(String query, IExecuteHandler prepare, IResultHandler<T> handler) {
         try (PreparedStatement stmt = getConnection().prepareStatement(query)) {
             prepare.accept(stmt);
+            stmt.execute();
             ResultSet result = stmt.getResultSet();
             return handler.handle(result);
         } catch (SQLException e) {
@@ -25,19 +30,21 @@ public class Executor {
         }
     }
 
-    public void execUpdate(String update, ExecuteHandler prepare) {
+    private <T extends DataSet> T execQuery(ParameterizedStatement parameterized, IResultHandler<T> handler) {
+        return execQuery(parameterized.getStmt(), parameterized.setParams(), handler);
+    }
+
+    public void execUpdate(String update, IExecuteHandler prepare) {
         try (PreparedStatement stmt = getConnection().prepareStatement(update)) {
-            if (prepare == null) {
-                return;
-            }
             prepare.accept(stmt);
+            stmt.execute();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
 
     public int execUpdate(String update) {
-        try (Statement stmt = connection.createStatement()) {
+        try (Statement stmt = getConnection().createStatement()) {
             stmt.execute(update);
             return stmt.getUpdateCount();
         } catch (SQLException e) {
@@ -45,32 +52,15 @@ public class Executor {
         }
     }
 
+    public void execUpdate(ParameterizedStatement parametrized) {
+        execUpdate(parametrized.getStmt(), parametrized.setParams());
+    }
+
     public <T extends DataSet> void save(T dataSet) {
-        StatementGenerator stmtGenerator = new StatementGenerator();
-        ParameterizedStatement pStmt = stmtGenerator.generateInsert(dataSet);
-        execUpdate(pStmt.getStmt(), stmt -> {
-            stmtGenerator.setParameters(stmt, pStmt.getParams());
-            System.out.println(stmt.toString());
-            stmt.execute();
-        });
+        execUpdate(statementFactory.generateInsert(dataSet));
     }
 
     public <T extends DataSet> T load(long id, Class<T> clazz) {
-        StatementGenerator stmtGenerator = new StatementGenerator();
-        ParameterizedStatement pStmt = stmtGenerator.generateSelect(clazz);
-        return execQuery(pStmt.getStmt(), stmt -> {
-            stmt.setLong(1, id);
-            System.out.println(stmt);
-            stmt.execute();
-        }, result -> {
-            if (!result.next()) {
-                return null;
-            }
-            if (!result.isLast()) {
-                throw new RuntimeException("Too many results");
-            }
-            ResultHandlerImpl handler = new ResultHandlerImpl();
-            return handler.getObject(result, clazz);
-        });
+        return execQuery(statementFactory.generateSelectById(id, clazz), resultHandler.getOne(clazz));
     }
 }

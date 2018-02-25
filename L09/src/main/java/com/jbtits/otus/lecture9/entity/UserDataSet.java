@@ -1,5 +1,7 @@
 package com.jbtits.otus.lecture9.entity;
 
+import java.util.Objects;
+
 public class UserDataSet extends DataSet {
     protected String name;
     protected int age;
@@ -19,5 +21,14 @@ public class UserDataSet extends DataSet {
                 ", age=" + age +
                 ", id=" + id +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        UserDataSet that = (UserDataSet) o;
+        return id == that.id && age == that.age &&
+            Objects.equals(name, that.name);
     }
 }

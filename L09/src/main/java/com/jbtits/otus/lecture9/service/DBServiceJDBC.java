@@ -1,10 +1,12 @@
 package com.jbtits.otus.lecture9.service;
 
 import com.jbtits.otus.lecture9.db.ConnectionHelper;
+import com.jbtits.otus.lecture9.entity.DataSet;
 import com.jbtits.otus.lecture9.entity.UserDataSet;
 import com.jbtits.otus.lecture9.executor.Executor;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 
 public class DBServiceJDBC implements DBService {
     private final Connection connection;
@@ -14,21 +16,21 @@ public class DBServiceJDBC implements DBService {
     public DBServiceJDBC() {
         connection = ConnectionHelper.getConnection();
         executor = new Executor(getConnection());
+        prepareTables();
     }
 
-    @Override
-    public void prepareTables() {
+    private void prepareTables() {
         executor.execUpdate(CREATE_TABLE_USER);
     }
 
     @Override
-    public void saveUser(UserDataSet user) {
-        executor.save(user);
+    public <T extends DataSet> void save(T dataSet) {
+        executor.save(dataSet);
     }
 
     @Override
-    public UserDataSet getUserById(long id) {
-        return executor.load(id, UserDataSet.class);
+    public <T extends DataSet> T getById(long id, Class<T> clazz) {
+        return executor.load(id, clazz);
     }
 
     @Override
@@ -36,8 +38,12 @@ public class DBServiceJDBC implements DBService {
     }
 
     @Override
-    public void close() throws Exception {
-        connection.close();
+    public void close() {
+        try {
+            connection.close();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     protected Connection getConnection() {
