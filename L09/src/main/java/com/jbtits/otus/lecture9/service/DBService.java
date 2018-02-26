@@ -8,9 +8,9 @@ import java.sql.SQLException;
 
 public interface DBService extends AutoCloseable {
 
-    <T extends DataSet> void save(T dataSet);
+    void saveUser(UserDataSet user);
 
-    <T extends DataSet> T getById(long id, Class<T> clazz);
+    UserDataSet getUserById(long id);
 
     void shutdown();
 }

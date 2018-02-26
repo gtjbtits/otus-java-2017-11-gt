@@ -29,18 +29,10 @@ public class UserDataSetTest {
         user.setName("John Doe");
         user.setAge(30);
         user.setId(10);
-        dbService.save(user);
-        UserDataSet loaded = dbService.getById(10, UserDataSet.class);
+        dbService.saveUser(user);
+        UserDataSet loaded = dbService.getUserById(10);
         System.out.println("user: " + user);
         System.out.println("loaded: " + loaded);
         assertTrue(user.equals(loaded));
-    }
-
-    @Test
-    public void reflectionHelper() {
-        UserDataSet user = new UserDataSet();
-        user.setName("John Doe");
-        user.setAge(30);
-        System.out.println(ReflectionHelper.getFields(user));
     }
 }

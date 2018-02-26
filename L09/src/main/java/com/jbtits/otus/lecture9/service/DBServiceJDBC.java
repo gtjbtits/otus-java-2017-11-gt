@@ -24,13 +24,13 @@ public class DBServiceJDBC implements DBService {
     }
 
     @Override
-    public <T extends DataSet> void save(T dataSet) {
-        executor.save(dataSet);
+    public void saveUser(UserDataSet user) {
+        executor.save(user);
     }
 
     @Override
-    public <T extends DataSet> T getById(long id, Class<T> clazz) {
-        return executor.load(id, clazz);
+    public UserDataSet getUserById(long id) {
+        return executor.load(id, UserDataSet.class);
     }
 
     @Override
