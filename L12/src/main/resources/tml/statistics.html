@@ -1,0 +1,79 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Cache service</title>
+    <script>
+        function refresh() {
+            location.reload();
+        }
+    </script>
+    <style>
+        * {
+          padding: 0;
+          margin: 0;
+        }
+        body {
+          font-family: Arial;
+          text-align: center;
+          margin: 1em;
+        }
+        table {
+          color: #222;
+          width: 50%;
+          position: relative;
+          margin: 0 auto;
+        }
+        table caption {
+            margin-top: 1em;
+            font-size: 150%;
+        }
+        table tr:nth-child(even) {
+          background-color: #efefef;
+        }
+        table th, table td {
+            text-align: center;
+            padding: 0.5em 0.2em;
+        }
+    </style>
+</head>
+<body onload='setInterval(function(){refresh()}, ${refreshPeriod} );'>
+<h1>Cache service</h1>
+<table>
+    <caption>Statistics</caption>
+    <colgroup>
+        <col span="1" style="width: 40%;">
+        <col span="1" style="width: 60%;">
+    </colgroup>
+    <tbody>
+        <tr>
+            <th>Cache hits count</th>
+            <td>${cacheHits}</td>
+        </tr><tr>
+            <th>Cache misses count</th>
+            <td>${cacheMisses}</td>
+        </tr><tr>
+            <th>Cache hits percentage</th>
+            <td>${cacheHitsPercentage}</td>
+        </tr><tr>
+            <th>Cache misses percentage</th>
+            <td>${cacheMissesPercentage}</td>
+        </tr>
+    </tbody>
+</table>
+<table>
+    <caption>Parameters</caption>
+    <colgroup>
+        <col span="1" style="width: 40%;">
+        <col span="1" style="width: 60%;">
+    </colgroup>
+    <tbody>
+        <tr>
+            <th>Max size (elements)</th>
+            <td>${cacheMaxElementsSize}</td>
+        </tr><tr>
+            <th>Idle timeout (ms)</th>
+            <td>${cacheIdleTimeout}</td>
+        </tr>
+    </tbody>
+</table>
+</body>
+</html>

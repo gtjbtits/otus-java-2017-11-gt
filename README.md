@@ -47,3 +47,10 @@ mvn test
 mvn test
 ```
 
+### L12: Cache service statistics 
+By default web server will starts at port `8080`. Please, use "-p" parameter, to choose different port
+```bash
+mvn package
+java -jar L12/target/gt-lecture12.jar [-p port]
+```
+
