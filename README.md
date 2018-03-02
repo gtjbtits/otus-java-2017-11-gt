@@ -49,6 +49,8 @@ mvn test
 
 ### L12: Cache service statistics 
 By default web server will starts at port `8080`. Please, use "-p" parameter, to choose different port
+
+Use *any* login & password to pass in for first time (it will create user for you in the database)
 ```bash
 mvn package
 java -jar L12/target/gt-lecture12.jar [-p port]
