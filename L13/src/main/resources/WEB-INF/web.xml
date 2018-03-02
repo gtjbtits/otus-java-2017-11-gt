@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<web-app>
+
+    <display-name>L12</display-name>
+    <description>Servlet with Spring example</description>
+
+    <servlet>
+        <servlet-name>CacheStatisticsServlet</servlet-name>
+        <servlet-class>com.jbtits.otus.lecture13.web.CacheStatisticsServlet</servlet-class>
+    </servlet>
+
+    <filter>
+        <filter-name>AuthFilter</filter-name>
+        <filter-class>com.jbtits.otus.lecture13.web.AuthFilter</filter-class>
+    </filter>
+
+    <servlet-mapping>
+        <servlet-name>CacheStatisticsServlet</servlet-name>
+        <url-pattern>/home</url-pattern>
+    </servlet-mapping>
+
+    <filter-mapping>
+        <filter-name>AuthFilter</filter-name>
+        <url-pattern>/home</url-pattern>
+    </filter-mapping>
+</web-app>
