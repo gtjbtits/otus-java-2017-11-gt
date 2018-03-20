@@ -56,3 +56,8 @@ mvn package
 java -jar L12/target/gt-lecture12.jar [-p port]
 ```
 
+### L14: Parallel merge sort
+```bash
+mvn test
+```
+
