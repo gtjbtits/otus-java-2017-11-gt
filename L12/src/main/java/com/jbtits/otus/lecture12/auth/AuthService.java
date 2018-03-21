@@ -1,7 +1,7 @@
-package com.jbtits.otus.lecture13.web;
+package com.jbtits.otus.lecture12.auth;
 
-import com.jbtits.otus.lecture13.dbService.DBService;
-import com.jbtits.otus.lecture13.dbService.dataSets.UserDataSet;
+import com.jbtits.otus.lecture12.dbService.DBService;
+import com.jbtits.otus.lecture12.dbService.dataSets.UserDataSet;
 
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
@@ -17,7 +17,7 @@ public class AuthService {
         this.dbService = dbService;
     }
 
-    public boolean authorize(AuthFilter.Credentials credentials) {
+    public boolean authorize(Credentials credentials) {
         if (credentials == null) {
             return false;
         }
@@ -42,7 +42,7 @@ public class AuthService {
         return toHex(md.digest(bytes));
     }
 
-    public UserDataSet createUser(AuthFilter.Credentials credentials) {
+    public UserDataSet createUser(Credentials credentials) {
         UserDataSet user = new UserDataSet();
         user.setName(credentials.getLogin());
         user.setPassword(encodePassword(credentials.getPassword()));

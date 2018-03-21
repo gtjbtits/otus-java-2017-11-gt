@@ -7,9 +7,9 @@ Vitaly Chibrikov (Виталий Чибриков)
 
 chibrikov@otus.ru
 
-Dmitry Arkhangelskiy (Дмитрий Архангельский)
+Oleg Klimakov (Олег Климаков)
 
-arhangeldim@otus.ru
+klimakov@otus.ru
 
 ### L01.1.1-maven
 ```bash
@@ -55,6 +55,13 @@ Use *any* login & password to pass in for first time (it will create user for yo
 mvn package
 java -jar L12/target/gt-lecture12.jar [-p port]
 ```
+
+### L13: Cache service statistics (Spring MVC implementation)
+```bash
+mvn package
+```
+Will outputs: `L14/target/gt-lecture13.war`. Please, deploy it to the yours external Jetty server.
+Controller mapped to the root URL.
 
 ### L14: Parallel merge sort
 ```bash

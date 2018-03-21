@@ -5,9 +5,9 @@ import com.jbtits.otus.lecture13.cache.MyElement;
 import com.jbtits.otus.lecture13.dbService.dataSets.DataSet;
 
 abstract public class CacheableDBService {
-    private CacheService<String, DataSet> cacheService;
+    private final CacheService<String, DataSet> cacheService;
 
-    CacheableDBService(CacheService cacheEngine) {
+    CacheableDBService(CacheService<String, DataSet> cacheEngine) {
         this.cacheService = cacheEngine;
     }
 

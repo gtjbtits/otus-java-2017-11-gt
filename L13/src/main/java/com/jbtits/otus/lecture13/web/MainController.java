@@ -2,32 +2,26 @@ package com.jbtits.otus.lecture13.web;
 
 import com.jbtits.otus.lecture13.cache.CacheService;
 import com.jbtits.otus.lecture13.dbService.dataSets.DataSet;
-import com.jbtits.otus.lecture13.services.CacheServiceSingleton;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+
 import java.util.HashMap;
 import java.util.Map;
 
-public class CacheStatisticsServlet extends HttpServlet {
-    private final CacheService<String, DataSet> cacheService = CacheServiceSingleton.get();
-
-    @Autowired
-    private ApplicationContext context;
-
+@Controller
+@RequestMapping("/")
+public class MainController {
     private static final int PERIOD_MS = 1000;
     private static final String REFRESH_VARIABLE_NAME = "refreshPeriod";
 
-    public void init() {
-        ApplicationContext context = new ClassPathXmlApplicationContext("SpringBeans.xml");
-    }
+    @Autowired
+    private CacheService<String, DataSet> cacheService;
 
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    @RequestMapping(method = RequestMethod.GET)
+    public String printStatistics(ModelMap model) {
         Map<String, Object> pageVariables = new HashMap<>();
         pageVariables.put("cacheHits", String.valueOf(cacheService.getHitCount()));
         pageVariables.put("cacheMisses", String.valueOf(cacheService.getMissCount()));
@@ -37,8 +31,7 @@ public class CacheStatisticsServlet extends HttpServlet {
         pageVariables.put("cacheIdleTimeout", String.valueOf(cacheService.getIdleTimeout()));
         pageVariables.put(REFRESH_VARIABLE_NAME, String.valueOf(PERIOD_MS));
 
-        resp.setContentType("text/html;charset=utf-8");
-        resp.getWriter().println(TemplateProcessor.instance().getPage("statistics.html", pageVariables));
-        resp.setStatus(HttpServletResponse.SC_OK);
+        model.addAllAttributes(pageVariables);
+        return "statistics";
     }
 }

@@ -1,27 +1,23 @@
-package com.jbtits.otus.lecture12.web;
+package com.jbtits.otus.lecture13.auth;
 
-import com.jbtits.otus.lecture12.dbService.DBService;
-import com.jbtits.otus.lecture12.dbService.dataSets.UserDataSet;
-import com.sun.tools.internal.xjc.reader.xmlschema.bindinfo.BIConversion;
+import com.jbtits.otus.lecture13.dbService.DBService;
+import com.jbtits.otus.lecture13.dbService.dataSets.UserDataSet;
 
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.NoSuchElementException;
-import java.util.function.Consumer;
 
 public class AuthService {
-    private static final String SALT = "312ke0~!#2432nF@$R$#&";
-
     private final DBService dbService;
+    private final String salt;
 
-    AuthService(DBService dbService) {
+    public AuthService(DBService dbService, String salt) {
         this.dbService = dbService;
+        this.salt = salt;
     }
 
-    public boolean authorize(AuthFilter.Credentials credentials) {
+    public boolean authorize(Credentials credentials) {
         if (credentials == null) {
             return false;
         }
@@ -36,7 +32,7 @@ public class AuthService {
     public String encodePassword(String password) {
         byte[] bytes;
         MessageDigest md;
-        String saltedPassword = password + SALT;
+        String saltedPassword = password + salt;
         try {
             bytes = saltedPassword.getBytes("UTF-8");
             md = MessageDigest.getInstance("MD5");
@@ -46,7 +42,7 @@ public class AuthService {
         return toHex(md.digest(bytes));
     }
 
-    public UserDataSet createUser(AuthFilter.Credentials credentials) {
+    public UserDataSet createUser(Credentials credentials) {
         UserDataSet user = new UserDataSet();
         user.setName(credentials.getLogin());
         user.setPassword(encodePassword(credentials.getPassword()));

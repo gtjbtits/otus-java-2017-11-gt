@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="
+        http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+        http://www.springframework.org/schema/aop
+        http://www.springframework.org/schema/aop/spring-aop-2.5.xsd
+        http://www.springframework.org/schema/tx
+        http://www.springframework.org/schema/tx/spring-tx-2.5.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd">
+    <context:component-scan base-package="com.jbtits.otus.lecture13" />
+
+    <bean id="cacheService" class="com.jbtits.otus.lecture13.cache.CacheServiceImpl">
+        <constructor-arg type = "int" value = "10"/>
+        <constructor-arg type = "long" value = "1000"/>
+    </bean>
+
+    <bean id="dbService" class="com.jbtits.otus.lecture13.dbService.DBServiceHibernateImpl">
+        <constructor-arg ref="cacheService" />
+    </bean>
+
+    <bean id="authService" class="com.jbtits.otus.lecture13.auth.AuthService">
+        <constructor-arg ref="dbService" />
+        <constructor-arg type="String" value="%$#T$ET^%TG%$" />
+    </bean>
+</beans>

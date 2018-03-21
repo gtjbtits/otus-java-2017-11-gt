@@ -1,5 +1,7 @@
 package com.jbtits.otus.lecture12.web;
 
+import com.jbtits.otus.lecture12.auth.AuthFilter;
+import com.jbtits.otus.lecture12.auth.AuthService;
 import com.jbtits.otus.lecture12.cache.CacheService;
 import com.jbtits.otus.lecture12.cache.CacheServiceImpl;
 import com.jbtits.otus.lecture12.dbService.DBService;
@@ -7,13 +9,11 @@ import com.jbtits.otus.lecture12.dbService.DBServiceHibernateImpl;
 import com.jbtits.otus.lecture12.dbService.dataSets.DataSet;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.HandlerList;
-import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 
 import javax.servlet.DispatcherType;
-import java.util.Arrays;
 import java.util.EnumSet;
 
 public class WebServer {
