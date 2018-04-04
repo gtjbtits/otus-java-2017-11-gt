@@ -1,0 +1,89 @@
+package com.jbtits.otus.lecture15.config;
+
+import com.jbtits.otus.lecture15.front.FrontendService;
+import com.jbtits.otus.lecture15.app.MessageSystemContext;
+import com.jbtits.otus.lecture15.cache.CacheService;
+import com.jbtits.otus.lecture15.cache.CacheServiceImpl;
+import com.jbtits.otus.lecture15.dbService.DBService;
+import com.jbtits.otus.lecture15.dbService.DBServiceHibernateImpl;
+import com.jbtits.otus.lecture15.dataSets.DataSet;
+import com.jbtits.otus.lecture15.front.FrontendServiceImpl;
+import com.jbtits.otus.lecture15.front.webSocket.WebSocketMessageMapper;
+import com.jbtits.otus.lecture15.front.webSocket.WebSocketMessageMapperImpl;
+import com.jbtits.otus.lecture15.front.webSocket.WebSocketSessionsRegistry;
+import com.jbtits.otus.lecture15.front.webSocket.WebSocketSessionsRegistryImpl;
+import com.jbtits.otus.lecture15.messageSystem.Address;
+import com.jbtits.otus.lecture15.messageSystem.MessageSystem;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.socket.config.annotation.EnableWebSocket;
+import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
+import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
+
+import javax.annotation.PostConstruct;
+
+@Configuration
+@EnableWebSocket
+@ComponentScan({"com.jbtits.otus.lecture15"})
+public class AppConfiguration implements WebSocketConfigurer {
+    @PostConstruct
+    public void startMessageSystem() {
+        frontendService().init();
+        dbService().init();
+        messageSystem().start();
+    }
+
+    @Bean
+    public MessageSystem messageSystem() {
+        return new MessageSystem();
+    }
+
+    @Bean
+    public Address frontAddress() {
+        return new Address("front");
+    }
+
+    @Bean
+    public Address dbAddress() {
+        return new Address("db");
+    }
+
+    @Bean
+    public MessageSystemContext messageSystemContext() {
+        MessageSystemContext context = new MessageSystemContext(messageSystem());
+        context.setFrontAddress(frontAddress());
+        context.setDbAddress(dbAddress());
+        return context;
+    }
+
+    @Bean
+    public CacheService<String, DataSet> cacheService() {
+        return new CacheServiceImpl<>(10,1000);
+    }
+
+    @Bean
+    public DBService dbService() {
+        return new DBServiceHibernateImpl(cacheService(), messageSystemContext(), dbAddress());
+    }
+
+    @Override
+    public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
+        registry.addHandler(frontendService(), "/ws");
+    }
+
+    @Bean
+    public WebSocketMessageMapper webSocketMessageMapper() {
+        return new WebSocketMessageMapperImpl();
+    }
+
+    @Bean
+    public WebSocketSessionsRegistry webSocketSessionsRegistry() {
+        return new WebSocketSessionsRegistryImpl();
+    }
+
+    @Bean
+    public FrontendService frontendService() {
+        return new FrontendServiceImpl(messageSystemContext(), frontAddress(), webSocketSessionsRegistry(), webSocketMessageMapper());
+    }
+}

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<web-app>
+    <display-name>L12</display-name>
+    <description>Servlet with Spring example</description>
+
+    <servlet>
+        <servlet-name>CacheStatisticsServlet</servlet-name>
+        <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+        <init-param>
+            <param-name>contextClass</param-name>
+            <param-value>org.springframework.web.context.support.AnnotationConfigWebApplicationContext</param-value>
+        </init-param>
+        <init-param>
+            <param-name>contextConfigLocation</param-name>
+            <param-value>com.jbtits.otus.lecture15.config.AppConfiguration</param-value>
+        </init-param>
+        <load-on-startup>1</load-on-startup>
+        <listener></listener>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>CacheStatisticsServlet</servlet-name>
+        <url-pattern>/</url-pattern>
+    </servlet-mapping>
+</web-app>

@@ -1,0 +1,8 @@
+Frontend service:
++ WSMessage: classes - request, response, action: message, request (token)
+- WSMEssage: data builder
+- WSActions <-> enum wrapper
+- users + sessions -> sessionRegistry
+
+MSG (DB):
+- encode password
