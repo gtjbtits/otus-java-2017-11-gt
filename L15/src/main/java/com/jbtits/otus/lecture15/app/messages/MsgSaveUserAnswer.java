@@ -10,17 +10,15 @@ import org.springframework.web.socket.WebSocketSession;
  * Created by tully.
  */
 public class MsgSaveUserAnswer extends MsgToFrontend {
-    private final UserDataSet user;
-    private final WebSocketSession session;
+    private final long userId;
 
-    public MsgSaveUserAnswer(Address from, Address to, UserDataSet user, WebSocketSession session) {
-        super(from, to);
+    public MsgSaveUserAnswer(Address from, Address to, String sessionId, long userId) {
+        super(from, to, sessionId);
         this.user = user;
-        this.session = session;
     }
 
     @Override
     public void exec(FrontendService frontendService) {
-        frontendService.addUser(user, session);
+        frontendService.addUser(user, getSessionId());
     }
 }

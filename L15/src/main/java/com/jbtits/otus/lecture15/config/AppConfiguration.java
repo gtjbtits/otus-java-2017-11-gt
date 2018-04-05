@@ -8,6 +8,8 @@ import com.jbtits.otus.lecture15.dbService.DBService;
 import com.jbtits.otus.lecture15.dbService.DBServiceHibernateImpl;
 import com.jbtits.otus.lecture15.dataSets.DataSet;
 import com.jbtits.otus.lecture15.front.FrontendServiceImpl;
+import com.jbtits.otus.lecture15.front.SecurityService;
+import com.jbtits.otus.lecture15.front.SecurityServiceImpl;
 import com.jbtits.otus.lecture15.front.webSocket.WebSocketMessageMapper;
 import com.jbtits.otus.lecture15.front.webSocket.WebSocketMessageMapperImpl;
 import com.jbtits.otus.lecture15.front.webSocket.WebSocketSessionsRegistry;
@@ -83,7 +85,13 @@ public class AppConfiguration implements WebSocketConfigurer {
     }
 
     @Bean
+    public SecurityService securityService() {
+        return new SecurityServiceImpl("VR#%#$54er21!!_fe");
+    }
+
+    @Bean
     public FrontendService frontendService() {
-        return new FrontendServiceImpl(messageSystemContext(), frontAddress(), webSocketSessionsRegistry(), webSocketMessageMapper());
+        return new FrontendServiceImpl(messageSystemContext(), frontAddress(), webSocketSessionsRegistry(),
+            webSocketMessageMapper(), securityService());
     }
 }

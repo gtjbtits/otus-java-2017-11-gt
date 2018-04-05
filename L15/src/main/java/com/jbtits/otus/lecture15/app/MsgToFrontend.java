@@ -1,16 +1,16 @@
 package com.jbtits.otus.lecture15.app;
 
+import com.jbtits.otus.lecture15.app.messages.SessionMessage;
 import com.jbtits.otus.lecture15.front.FrontendService;
 import com.jbtits.otus.lecture15.messageSystem.Address;
 import com.jbtits.otus.lecture15.messageSystem.Addressee;
-import com.jbtits.otus.lecture15.messageSystem.Message;
 
 /**
  * Created by tully.
  */
-public abstract class MsgToFrontend extends Message {
-    public MsgToFrontend(Address from, Address to) {
-        super(from, to);
+public abstract class MsgToFrontend extends SessionMessage {
+    public MsgToFrontend(Address from, Address to, String sessionId) {
+        super(from, to, sessionId);
     }
 
     @Override

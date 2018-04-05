@@ -1,11 +1,15 @@
 package com.jbtits.otus.lecture15.front.webSocket;
 
+import org.springframework.web.socket.WebSocketSession;
+
 public interface WebSocketSessionsRegistry {
-    boolean register(String sessionId, Long userId);
+    void register(WebSocketSession session);
 
     void unregister(String sessionId);
 
+    void setUserSession(String sessionId, long userId);
+
     Long getUserId(String sessionId);
 
-    boolean isRegistered(String sessionId);
+    boolean hasUser(String sessionId);
 }

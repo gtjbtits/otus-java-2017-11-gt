@@ -31,12 +31,16 @@ public class FrontendServiceImpl extends TextWebSocketHandler implements Fronten
     private final MessageSystemContext context;
     private final WebSocketSessionsRegistry registry;
     private final WebSocketMessageMapper mapper;
+    private final SecurityService security;
 
-    public FrontendServiceImpl(MessageSystemContext context, Address address, WebSocketSessionsRegistry registry, WebSocketMessageMapper mapper) {
+    public FrontendServiceImpl(MessageSystemContext context, Address address, WebSocketSessionsRegistry registry,
+        WebSocketMessageMapper mapper, SecurityService security) {
+
         this.context = context;
         this.address = address;
         this.registry = registry;
         this.mapper = mapper;
+        this.security = security;
     }
 
     public void init() {
@@ -49,7 +53,7 @@ public class FrontendServiceImpl extends TextWebSocketHandler implements Fronten
     }
 
     @Override
-    public void addUser(UserDataSet user, WebSocketSession session) {
+    public void addUser(UserDataSet user, String sessionId) {
         registry.register(session.getId(), user.getId());
         Action action = new ActionWithSuccess(SIGNUP_RESPONSE_ACTION, true);
         String json = mapper.serialize(action);
@@ -70,7 +74,7 @@ public class FrontendServiceImpl extends TextWebSocketHandler implements Fronten
     }
 
     private boolean validateRequest(Action action, WebSocketSession session) {
-        boolean isRegistered = registry.isRegistered(session.getId());
+        boolean isRegistered = registry.hasUser(session.getId());
         if (mapper.isUnauthClientAction(action.getAction())) {
             return !isRegistered;
         }
@@ -79,11 +83,13 @@ public class FrontendServiceImpl extends TextWebSocketHandler implements Fronten
     }
 
     private void handleRequest(Action action, WebSocketSession session) {
+        registry.register(session);
         switch (action.getAction()) {
             case SIGNUP_ACTION:
                 ActionWithAuth auth = (ActionWithAuth) action;
-                Message message = new MsgSaveUser(
-                    getAddress(), context.getDbAddress(), auth.getLogin(), auth.getPassword(), session);
+                String encodedPassword = security.encodePassword(auth.getPassword());
+                Message message = new MsgSaveUser(getAddress(), context.getDbAddress(), session.getId(),
+                    auth.getLogin(), encodedPassword);
                 sendMessage(message);
                 break;
             default:
