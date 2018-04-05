@@ -19,7 +19,14 @@ public class JacksonTest {
     }
 
     @Test
-    public void parseTest() throws IOException {
+    public void excessFieldDoesNotThrowsException() throws IOException {
         mapper.readValue("{\"action\": \"test\", \"other_field\": \"1\"}", Action.class);
+    }
+
+    @Test
+    public void requiredTest() throws IOException {
+        Action res = mapper.readValue("{\"a\": \"test\"}", Action.class);
+//        Action res = mapper.readValue("{}", Action.class);
+        System.out.println(res.getAction());
     }
 }

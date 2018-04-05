@@ -22,6 +22,7 @@ var message = function (action, obj) {
     return newObj;
 }
 var signup = function(login, password) {
+    console.log("signup", login, password);
     send(message("signup", {"login": login, "password": password}));
 }
 

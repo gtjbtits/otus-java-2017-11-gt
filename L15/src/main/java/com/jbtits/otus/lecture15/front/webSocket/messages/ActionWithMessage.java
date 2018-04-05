@@ -1,13 +1,16 @@
 package com.jbtits.otus.lecture15.front.webSocket.messages;
 
-public class WSMessage extends Action {
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+public class ActionWithMessage extends Action {
+    @JsonProperty(required = true)
     private String message;
 
-    public WSMessage() {
+    public ActionWithMessage() {
         super();
     }
 
-    public WSMessage(String action, String message) {
+    public ActionWithMessage(String action, String message) {
         super(action);
         this.message = message;
     }

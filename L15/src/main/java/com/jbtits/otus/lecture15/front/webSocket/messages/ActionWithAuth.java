@@ -1,14 +1,18 @@
 package com.jbtits.otus.lecture15.front.webSocket.messages;
 
-public class AuthAction extends Action {
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+public class ActionWithAuth extends Action {
+    @JsonProperty(required = true)
     private String login;
+    @JsonProperty(required = true)
     private String password;
 
-    public AuthAction() {
+    public ActionWithAuth() {
         super();
     }
 
-    public AuthAction(String action, String login, String password) {
+    public ActionWithAuth(String action, String login, String password) {
         super(action);
         this.login = login;
         this.password = password;
