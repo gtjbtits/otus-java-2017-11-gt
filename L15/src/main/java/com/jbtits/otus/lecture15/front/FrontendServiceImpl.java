@@ -7,7 +7,7 @@ import com.jbtits.otus.lecture15.front.webSocket.WebSocketException;
 import com.jbtits.otus.lecture15.front.webSocket.WebSocketMessageMapper;
 import com.jbtits.otus.lecture15.front.webSocket.WebSocketSessionsRegistry;
 import com.jbtits.otus.lecture15.front.webSocket.messages.Action;
-import com.jbtits.otus.lecture15.front.webSocket.messages.TokenAction;
+import com.jbtits.otus.lecture15.front.webSocket.messages.AuthAction;
 import com.jbtits.otus.lecture15.front.webSocket.messages.WSMessage;
 import com.jbtits.otus.lecture15.messageSystem.Address;
 import com.jbtits.otus.lecture15.messageSystem.Message;
@@ -53,10 +53,10 @@ public class FrontendServiceImpl extends TextWebSocketHandler implements Fronten
         registry.register(session.getId(), user.getId());
         Action action = new Action(SIGNUP_RESPONSE_ACTION);
         String json = mapper.serialize(action);
-        sendMessage(json, session);
+        sendWSMessage(json, session);
     }
 
-    private void sendMessage(String json, WebSocketSession session) {
+    private void sendWSMessage(String json, WebSocketSession session) {
         try {
             session.sendMessage(new TextMessage(json));
         } catch (IOException e) {
@@ -74,27 +74,28 @@ public class FrontendServiceImpl extends TextWebSocketHandler implements Fronten
         if (mapper.isUnauthClientAction(action.getAction())) {
             return !isRegistered;
         }
-//        TokenAction tokenAction = (TokenAction) action;
-//        String token = tokenAction.getToken();
-//        if (token != null && isRegistered) {
-//            return false;
-//        }
+        // TODO: token auth (regenerate session, if connection was broken)
         return isRegistered;
     }
 
     private void handleRequest(Action action, WebSocketSession session) {
         switch (action.getAction()) {
             case SIGNUP_ACTION:
+                AuthAction auth = (AuthAction) action;
                 Message message = new MsgSaveUser(
                     getAddress(), context.getDbAddress(),
-                    "login", "password", session);
-                context.getMessageSystem().sendMessage(message);
+                    auth.getLogin(), auth.getPassword(), session);
+                sendMessage(message);
                 break;
             default:
                 // TODO: log
                 System.out.println("[!] No handler for action " + action.getAction());
                 break;
         }
+    }
+
+    private void sendMessage(Message message) {
+        context.getMessageSystem().sendMessage(message);
     }
 
     @Override
@@ -105,11 +106,11 @@ public class FrontendServiceImpl extends TextWebSocketHandler implements Fronten
             Action action = mapper.parse(text.getPayload());
             if (!mapper.isSupportedClientAction(action.getAction())) {
 //                // TODO: Logger
-                throw new WebSocketException("[!] Unsupported client action " + action.getAction());
+                throw new WebSocketException("Unsupported action");
             }
             if (!validateRequest(action, concurrentSession)) {
 //                // TODO: Logger
-                throw new WebSocketException("[!] Validation failed");
+                throw new WebSocketException("Validation failed");
             }
             handleRequest(action, session);
         } catch (WebSocketException e) {
@@ -119,6 +120,6 @@ public class FrontendServiceImpl extends TextWebSocketHandler implements Fronten
 
     private void handleException(Throwable cause, WebSocketSession session) {
         WSMessage message = new WSMessage(ERROR_ACTION, cause.getMessage());
-        sendMessage(mapper.serialize(message), session);
+        sendWSMessage(mapper.serialize(message), session);
     }
 }

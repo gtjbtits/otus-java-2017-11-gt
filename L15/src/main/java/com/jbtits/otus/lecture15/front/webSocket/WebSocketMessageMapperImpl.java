@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.jbtits.otus.lecture15.front.webSocket.messages.Action;
-import com.jbtits.otus.lecture15.front.webSocket.messages.TokenAction;
+import com.jbtits.otus.lecture15.front.webSocket.messages.AuthAction;
 import com.jbtits.otus.lecture15.utils.ArrayUtils;
 
 import java.io.IOException;
@@ -36,8 +36,8 @@ public class WebSocketMessageMapperImpl implements WebSocketMessageMapper {
     }
 
     private void fillActions() {
-        actions.put(SIGNIN_RESPONSE_ACTION, TokenAction.class);
-        actions.put(SIGNUP_RESPONSE_ACTION, TokenAction.class);
+        actions.put(SIGNUP_ACTION, AuthAction.class);
+        actions.put(SIGNIN_ACTION, AuthAction.class);
     }
 
     public <T extends Action> T parse(String json) {
