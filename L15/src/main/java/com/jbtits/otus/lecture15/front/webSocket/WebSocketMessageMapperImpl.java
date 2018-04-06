@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.jbtits.otus.lecture15.front.webSocket.messages.Action;
 import com.jbtits.otus.lecture15.front.webSocket.messages.AuthAction;
+import com.jbtits.otus.lecture15.front.webSocket.messages.MessageAction;
 import com.jbtits.otus.lecture15.front.webSocket.messages.SuccessAction;
 import com.jbtits.otus.lecture15.utils.ArrayUtils;
 import com.jbtits.otus.lecture15.utils.reflection.ReflectionUtils;
@@ -23,8 +24,8 @@ public class WebSocketMessageMapperImpl implements WebSocketMessageMapper {
     public final static String SIGNUP_RESPONSE_ACTION = "signup_response";
     public final static String SIGNIN_ACTION = "signin";
     public final static String SIGNIN_RESPONSE_ACTION = "signin_response";
-    public final static String SEND_MESSAGE_ACTION = "message";
-    public final static String MESSAGE_RESPONSE_ACTION = "message_response";
+    public final static String CLIENT_MESSAGE = "client_message";
+    public final static String SERVER_MESSAGE = "server_message";
 
     private final static String supportedUnauthClientActions[] = {
         SIGNUP_ACTION,
@@ -32,7 +33,7 @@ public class WebSocketMessageMapperImpl implements WebSocketMessageMapper {
     };
 
     private final static String supportedAuthClientActions[] = {
-        SEND_MESSAGE_ACTION
+            CLIENT_MESSAGE
     };
 
     private final ObjectMapper mapper;
@@ -49,6 +50,8 @@ public class WebSocketMessageMapperImpl implements WebSocketMessageMapper {
         actions.put(SIGNIN_ACTION, AuthAction.class);
         actions.put(SIGNUP_RESPONSE_ACTION, SuccessAction.class);
         actions.put(SIGNIN_RESPONSE_ACTION, SuccessAction.class);
+        actions.put(CLIENT_MESSAGE, MessageAction.class);
+        actions.put(SERVER_MESSAGE, MessageAction.class);
     }
 
     public <T extends Action> T parse(String json) {

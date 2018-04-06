@@ -9,7 +9,6 @@ import java.util.Objects;
 
 @Entity
 @Table(name = "user")
-@Proxy(lazy = false)
 public class UserDataSet extends DataSet {
     @Override
     public String toString() {

@@ -2,17 +2,20 @@ package com.jbtits.otus.lecture15.dbService;
 
 import com.jbtits.otus.lecture15.app.MessageSystemContext;
 import com.jbtits.otus.lecture15.cache.CacheService;
+import com.jbtits.otus.lecture15.dataSets.*;
+import com.jbtits.otus.lecture15.dbService.dao.MessageDataSetDAO;
 import com.jbtits.otus.lecture15.dbService.dao.UserDataSetDAO;
-import com.jbtits.otus.lecture15.dataSets.AddressDataSet;
-import com.jbtits.otus.lecture15.dataSets.PhoneDataSet;
-import com.jbtits.otus.lecture15.dataSets.UserDataSet;
 import com.jbtits.otus.lecture15.dbService.executor.SessionExecutor;
 import com.jbtits.otus.lecture15.messageSystem.Address;
 import com.jbtits.otus.lecture15.messageSystem.MessageSystem;
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.service.ServiceRegistry;
+
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class DBServiceHibernateImpl extends CacheableDBService implements DBService {
     private final SessionFactory sessionFactory;
@@ -36,6 +39,7 @@ public class DBServiceHibernateImpl extends CacheableDBService implements DBServ
         Configuration configuration = new Configuration();
 
         configuration.addAnnotatedClass(UserDataSet.class);
+        configuration.addAnnotatedClass(MessageDataSet.class);
         configuration.addAnnotatedClass(AddressDataSet.class);
         configuration.addAnnotatedClass(PhoneDataSet.class);
 
@@ -61,14 +65,38 @@ public class DBServiceHibernateImpl extends CacheableDBService implements DBServ
 
     @Override
     public void saveUser(UserDataSet user) {
-        long id = executor.runInSession(session -> {
+//        long id = executor.runInSession(session -> {
+//            UserDataSetDAO dao = new UserDataSetDAO(session);
+//            return dao.save(user);
+//        });
+//        user.setId(id);
+//        cachePut(id, user);
+        save(user, session -> {
             UserDataSetDAO dao = new UserDataSetDAO(session);
             return dao.save(user);
         });
-        user.setId(id);
-        cachePut(id, user);
     }
 
+    @Override
+    public void saveMessage(MessageDataSet message, long userId) {
+        save(message, session -> {
+//            UserDataSetDAO userDAO = new UserDataSetDAO(session);
+            MessageDataSetDAO messageDAO = new MessageDataSetDAO(session);
+            return messageDAO.save(message, userId);
+        });
+//        long id = executor.runInSession(session -> {
+//            MessageDataSetDAO dao = new MessageDataSetDAO(session);
+//            return dao.save(message);
+//        });
+//        message.setId(id);
+//        cachePut(id, message);
+    }
+
+    private <T extends DataSet> void save(T dataSet, Function<Session, Long> callDAO) {
+        long id = executor.runInSession(callDAO);
+        dataSet.setId(id);
+        cachePut(id, dataSet);
+    }
 
     @Override
     public UserDataSet getUserById(long id) {

@@ -48,6 +48,11 @@ public class WebSocketSessionsRegistryImpl implements WebSocketSessionsRegistry 
     }
 
     @Override
+    public WebSocketSession[] getUserSessions() {
+        return users.keySet().stream().map(sessionId -> sessions.get(sessionId)).toArray(WebSocketSession[]::new);
+    }
+
+    @Override
     public boolean hasUser(String sessionId) {
         return getUserId(sessionId) != null;
     }

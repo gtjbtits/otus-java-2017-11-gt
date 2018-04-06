@@ -13,5 +13,7 @@ public interface WebSocketSessionsRegistry {
 
     WebSocketSession getSession(String sessionId);
 
+    WebSocketSession[] getUserSessions();
+
     boolean hasUser(String sessionId);
 }

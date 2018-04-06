@@ -36,7 +36,7 @@ var signin = function(login, password) {
 }
 var sendTextMessage = function(text) {
     console.log("text message", text);
-    send(message("message", {"text": login}));
+    send(message("client_message", {"message": text}));
 }
 
 restart();

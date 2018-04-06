@@ -1,6 +1,9 @@
 package com.jbtits.otus.lecture15.front.webSocket;
 
 public enum ErrorCode {
+    WS_SESSION_CLOSED(402),
+    WS_SEND_MESSAGE_ERROR(401),
+//    WS_ERROR(400),
     JSON_BAD_ACTION(304),
     JSON_REQUIRED_ERROR(303),
     JSON_SERIALIZE_ERROR(302),
@@ -12,7 +15,7 @@ public enum ErrorCode {
     DB_USER_ALREADY_EXISTS(101),
 //    DB_ERROR(100),
     UNSUPPORTED_ACTION(4),
-    WS_MESSAGE_NOT_VALID(3),
+    ACTION_VALIDATION_FAILED(3),
     UNKNOWN(1);
 
     private final int code;
