@@ -5,8 +5,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.jbtits.otus.lecture15.front.webSocket.messages.Action;
-import com.jbtits.otus.lecture15.front.webSocket.messages.ActionWithAuth;
-import com.jbtits.otus.lecture15.front.webSocket.messages.ActionWithSuccess;
+import com.jbtits.otus.lecture15.front.webSocket.messages.AuthAction;
+import com.jbtits.otus.lecture15.front.webSocket.messages.SuccessAction;
 import com.jbtits.otus.lecture15.utils.ArrayUtils;
 import com.jbtits.otus.lecture15.utils.reflection.ReflectionUtils;
 import com.jbtits.otus.lecture15.utils.reflection.SimpleField;
@@ -42,17 +42,17 @@ public class WebSocketMessageMapperImpl implements WebSocketMessageMapper {
     }
 
     private void fillActions() {
-        actions.put(SIGNUP_ACTION, ActionWithAuth.class);
-        actions.put(SIGNIN_ACTION, ActionWithAuth.class);
-        actions.put(SIGNUP_RESPONSE_ACTION, ActionWithSuccess.class);
-        actions.put(SIGNIN_RESPONSE_ACTION, ActionWithSuccess.class);
+        actions.put(SIGNUP_ACTION, AuthAction.class);
+        actions.put(SIGNIN_ACTION, AuthAction.class);
+        actions.put(SIGNUP_RESPONSE_ACTION, SuccessAction.class);
+        actions.put(SIGNIN_RESPONSE_ACTION, SuccessAction.class);
     }
 
     public <T extends Action> T parse(String json) {
         Action action = parse(json, Action.class);
         String actionName = action.getAction();
-        if (actionName == null) {
-            throw new NullPointerException("No action name present");
+        if (actionName == null || !isSupportedClientAction(actionName)) {
+            throw new WebSocketError(ErrorCode.JSON_BAD_ACTION);
         }
         if (!actions.containsKey(actionName)) {
             return (T) action;
@@ -66,13 +66,12 @@ public class WebSocketMessageMapperImpl implements WebSocketMessageMapper {
         try {
             json = mapper.writeValueAsString(message);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException("Websocket message object to json serialization error", e);
+            throw new WebSocketError(ErrorCode.JSON_SERIALIZE_ERROR, e);
         }
         return json;
     }
 
-    @Override
-    public boolean isSupportedClientAction(String action) {
+    private boolean isSupportedClientAction(String action) {
         return ArrayUtils.inArray(ArrayUtils.concat(supportedUnauthClientActions, supportedAuthClientActions), action);
     }
 
@@ -86,10 +85,10 @@ public class WebSocketMessageMapperImpl implements WebSocketMessageMapper {
         try {
             action = (T) mapper.readValue(json, clazz);
         } catch (IOException e) {
-            throw new RuntimeException("Can\'t parse websocket message json", e);
+            throw new WebSocketError(ErrorCode.JSON_PARSE_ERROR, e);
         }
         if (!requiredCheck(action, Action.class)) {
-            throw new RuntimeException("Json validation failed: some of required fields has null value");
+            throw new WebSocketError(ErrorCode.JSON_REQUIRED_ERROR);
         }
         return action;
     }

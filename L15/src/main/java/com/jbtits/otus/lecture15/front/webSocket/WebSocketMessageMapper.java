@@ -7,7 +7,5 @@ public interface WebSocketMessageMapper {
 
     <T extends Action> String serialize(T message);
 
-    boolean isSupportedClientAction(String action);
-
     boolean isUnauthClientAction(String action);
 }

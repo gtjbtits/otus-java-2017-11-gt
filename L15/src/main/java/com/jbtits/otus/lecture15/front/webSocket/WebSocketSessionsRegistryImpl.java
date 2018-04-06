@@ -1,6 +1,7 @@
 package com.jbtits.otus.lecture15.front.webSocket;
 
 import org.springframework.web.socket.WebSocketSession;
+import org.springframework.web.socket.handler.ConcurrentWebSocketSessionDecorator;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -8,6 +9,8 @@ import java.util.concurrent.ConcurrentMap;
 public class WebSocketSessionsRegistryImpl implements WebSocketSessionsRegistry {
     private ConcurrentMap<String, WebSocketSession> sessions;
     private ConcurrentMap<String, Long> users;
+    private static final int SEND_TIME_LIMIT = 1000;
+    private static final int BUFFER_SIZE_LIMIT = 1024;
 
     public WebSocketSessionsRegistryImpl() {
         sessions = new ConcurrentHashMap<>();
@@ -16,7 +19,9 @@ public class WebSocketSessionsRegistryImpl implements WebSocketSessionsRegistry 
 
     @Override
     public void register(WebSocketSession session) {
-        sessions.put(session.getId(), session);
+        ConcurrentWebSocketSessionDecorator concurrentSession
+            = new ConcurrentWebSocketSessionDecorator(session, SEND_TIME_LIMIT, BUFFER_SIZE_LIMIT);
+        sessions.put(session.getId(), concurrentSession);
     }
 
     @Override
@@ -35,6 +40,11 @@ public class WebSocketSessionsRegistryImpl implements WebSocketSessionsRegistry 
     @Override
     public Long getUserId(String sessionId) {
         return users.get(sessionId);
+    }
+
+    @Override
+    public WebSocketSession getSession(String sessionId) {
+        return sessions.get(sessionId);
     }
 
     @Override

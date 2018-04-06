@@ -2,19 +2,13 @@ package com.jbtits.otus.lecture15.front;
 
 import com.jbtits.otus.lecture15.app.MessageSystemContext;
 import com.jbtits.otus.lecture15.app.messages.MsgSaveUser;
-import com.jbtits.otus.lecture15.dataSets.UserDataSet;
-import com.jbtits.otus.lecture15.front.webSocket.WebSocketMessageMapper;
-import com.jbtits.otus.lecture15.front.webSocket.WebSocketSessionsRegistry;
-import com.jbtits.otus.lecture15.front.webSocket.messages.Action;
-import com.jbtits.otus.lecture15.front.webSocket.messages.ActionWithAuth;
-import com.jbtits.otus.lecture15.front.webSocket.messages.ActionWithMessage;
-import com.jbtits.otus.lecture15.front.webSocket.messages.ActionWithSuccess;
+import com.jbtits.otus.lecture15.front.webSocket.*;
+import com.jbtits.otus.lecture15.front.webSocket.messages.*;
 import com.jbtits.otus.lecture15.messageSystem.Address;
 import com.jbtits.otus.lecture15.messageSystem.Message;
 import com.jbtits.otus.lecture15.messageSystem.MessageSystem;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
-import org.springframework.web.socket.handler.ConcurrentWebSocketSessionDecorator;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import java.io.IOException;
@@ -26,7 +20,7 @@ import static com.jbtits.otus.lecture15.front.webSocket.WebSocketMessageMapperIm
 /**
  * Created by tully.
  */
-public class FrontendServiceImpl extends TextWebSocketHandler implements FrontendService {
+public class FrontendServiceImpl extends TextWebSocketHandler implements FrontendService, WebSocketErrorHandler {
     private final Address address;
     private final MessageSystemContext context;
     private final WebSocketSessionsRegistry registry;
@@ -53,11 +47,11 @@ public class FrontendServiceImpl extends TextWebSocketHandler implements Fronten
     }
 
     @Override
-    public void addUser(UserDataSet user, String sessionId) {
-        registry.register(session.getId(), user.getId());
-        Action action = new ActionWithSuccess(SIGNUP_RESPONSE_ACTION, true);
+    public void addUser(long userId, String uuid, String sessionId) {
+        registry.setUserSession(sessionId, userId);
+        Action action = new SuccessAction(uuid, SIGNUP_RESPONSE_ACTION, true);
         String json = mapper.serialize(action);
-        sendWSMessage(json, session);
+        sendWSMessage(json, registry.getSession(sessionId));
     }
 
     private void sendWSMessage(String json, WebSocketSession session) {
@@ -86,15 +80,15 @@ public class FrontendServiceImpl extends TextWebSocketHandler implements Fronten
         registry.register(session);
         switch (action.getAction()) {
             case SIGNUP_ACTION:
-                ActionWithAuth auth = (ActionWithAuth) action;
+                AuthAction auth = (AuthAction) action;
                 String encodedPassword = security.encodePassword(auth.getPassword());
-                Message message = new MsgSaveUser(getAddress(), context.getDbAddress(), session.getId(),
-                    auth.getLogin(), encodedPassword);
+                Message message = new MsgSaveUser(getAddress(), context.getDbAddress(), action.getUuid(), session.getId(),
+                    this, auth.getLogin(), encodedPassword);
                 sendMessage(message);
                 break;
             default:
                 // TODO: log
-                throw new RuntimeException("Nothing to do (no specific handler provided)");
+                throw new WebSocketError(ErrorCode.UNSUPPORTED_ACTION);
         }
     }
 
@@ -103,27 +97,42 @@ public class FrontendServiceImpl extends TextWebSocketHandler implements Fronten
     }
 
     @Override
-    protected void handleTextMessage(WebSocketSession session, TextMessage text) throws Exception {
-        ConcurrentWebSocketSessionDecorator concurrentSession
-            = new ConcurrentWebSocketSessionDecorator(session, 1000, 1024);
+    protected void handleTextMessage(WebSocketSession session, TextMessage text) {
         try {
             Action action = mapper.parse(text.getPayload());
-            if (!mapper.isSupportedClientAction(action.getAction())) {
-//                // TODO: Logger
-                throw new RuntimeException("Unsupported action");
+            if (!validateRequest(action, session)) {
+                // TODO: log me
+                throw new WebSocketError(ErrorCode.WS_MESSAGE_NOT_VALID);
             }
-            if (!validateRequest(action, concurrentSession)) {
-//                // TODO: Logger
-                throw new RuntimeException("Validation failed");
-            }
-            handleRequest(action, concurrentSession);
+            handleRequest(action, session);
+        } catch (WebSocketError e) {
+            handleException(e, session);
         } catch (Exception e) {
-            handleException(e, concurrentSession);
+            handleException(new WebSocketError(ErrorCode.UNKNOWN, e), session);
         }
     }
 
-    private void handleException(Exception e, WebSocketSession session) {
-        ActionWithMessage message = new ActionWithMessage(ERROR_ACTION, e.getMessage());
-        sendWSMessage(mapper.serialize(message), session);
+    private ErrorAction prepareErrorAction(WebSocketError e, String uuid) {
+        ErrorAction error;
+        if (e.getCause() != null) {
+            String trace = org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(e.getCause());
+            error = new ErrorAction(uuid, e.getMessage(), trace);
+        } else {
+            error = new ErrorAction(uuid, e.getMessage());
+        }
+        return error;
+    }
+
+    private ErrorAction prepareErrorAction(WebSocketError e) {
+        return prepareErrorAction(e, UUIDs.MIRACAST);
+    }
+
+    private void handleException(WebSocketError e, WebSocketSession session) {
+        sendWSMessage(mapper.serialize(prepareErrorAction(e)), session);
+    }
+
+    @Override
+    public void handleException(WebSocketError e, String sessionId, String uuid) {
+        sendWSMessage(mapper.serialize(prepareErrorAction(e, uuid)), registry.getSession(sessionId));
     }
 }

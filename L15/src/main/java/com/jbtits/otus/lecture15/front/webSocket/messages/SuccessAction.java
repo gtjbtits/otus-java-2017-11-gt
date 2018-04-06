@@ -2,16 +2,16 @@ package com.jbtits.otus.lecture15.front.webSocket.messages;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class ActionWithSuccess extends Action {
+public class SuccessAction extends Action {
     @JsonProperty(required = true)
     private boolean success;
 
-    public ActionWithSuccess() {
+    public SuccessAction() {
         super();
     }
 
-    public ActionWithSuccess(String action, boolean success) {
-        super(action);
+    public SuccessAction(String uuid, String action, boolean success) {
+        super(uuid, action);
         this.success = success;
     }
 

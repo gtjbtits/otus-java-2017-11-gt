@@ -25,8 +25,15 @@ public class JacksonTest {
 
     @Test
     public void requiredTest() throws IOException {
-        Action res = mapper.readValue("{\"a\": \"test\"}", Action.class);
+        Action res = mapper.readValue("{\"action\": \"test\"}", Action.class);
 //        Action res = mapper.readValue("{}", Action.class);
-        System.out.println(res.getAction());
+        System.out.println(res.getTimestamp());
+    }
+
+    @Test
+    public void rewriteFieldsTest() throws IOException {
+        Action res = mapper.readValue("{\"ts\": \"1000\", \"a\": \"test\"}", Action.class);
+//        Action res = mapper.readValue("{}", Action.class);
+        System.out.println(res.getTimestamp());
     }
 }
