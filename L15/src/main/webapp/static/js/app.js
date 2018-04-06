@@ -30,5 +30,13 @@ var signup = function(login, password) {
     console.log("signup", login, password);
     send(message("signup", {"login": login, "password": password}));
 }
+var signin = function(login, password) {
+    console.log("signin", login, password);
+    send(message("signin", {"login": login, "password": password}));
+}
+var sendTextMessage = function(text) {
+    console.log("text message", text);
+    send(message("message", {"text": login}));
+}
 
 restart();

@@ -23,6 +23,8 @@ public class WebSocketMessageMapperImpl implements WebSocketMessageMapper {
     public final static String SIGNUP_RESPONSE_ACTION = "signup_response";
     public final static String SIGNIN_ACTION = "signin";
     public final static String SIGNIN_RESPONSE_ACTION = "signin_response";
+    public final static String SEND_MESSAGE_ACTION = "message";
+    public final static String MESSAGE_RESPONSE_ACTION = "message_response";
 
     private final static String supportedUnauthClientActions[] = {
         SIGNUP_ACTION,
@@ -30,6 +32,7 @@ public class WebSocketMessageMapperImpl implements WebSocketMessageMapper {
     };
 
     private final static String supportedAuthClientActions[] = {
+        SEND_MESSAGE_ACTION
     };
 
     private final ObjectMapper mapper;

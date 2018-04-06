@@ -1,6 +1,7 @@
 package com.jbtits.otus.lecture15.front;
 
 import com.jbtits.otus.lecture15.app.MessageSystemContext;
+import com.jbtits.otus.lecture15.app.messages.MsgGetUser;
 import com.jbtits.otus.lecture15.app.messages.MsgSaveUser;
 import com.jbtits.otus.lecture15.front.webSocket.*;
 import com.jbtits.otus.lecture15.front.webSocket.messages.*;
@@ -13,9 +14,7 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import java.io.IOException;
 
-import static com.jbtits.otus.lecture15.front.webSocket.WebSocketMessageMapperImpl.ERROR_ACTION;
-import static com.jbtits.otus.lecture15.front.webSocket.WebSocketMessageMapperImpl.SIGNUP_ACTION;
-import static com.jbtits.otus.lecture15.front.webSocket.WebSocketMessageMapperImpl.SIGNUP_RESPONSE_ACTION;
+import static com.jbtits.otus.lecture15.front.webSocket.WebSocketMessageMapperImpl.*;
 
 /**
  * Created by tully.
@@ -47,7 +46,7 @@ public class FrontendServiceImpl extends TextWebSocketHandler implements Fronten
     }
 
     @Override
-    public void addUser(long userId, String uuid, String sessionId) {
+    public void registerUser(long userId, String uuid, String sessionId) {
         registry.setUserSession(sessionId, userId);
         Action action = new SuccessAction(uuid, SIGNUP_RESPONSE_ACTION, true);
         String json = mapper.serialize(action);
@@ -80,10 +79,17 @@ public class FrontendServiceImpl extends TextWebSocketHandler implements Fronten
         registry.register(session);
         switch (action.getAction()) {
             case SIGNUP_ACTION:
+            case SIGNIN_ACTION:
                 AuthAction auth = (AuthAction) action;
                 String encodedPassword = security.encodePassword(auth.getPassword());
-                Message message = new MsgSaveUser(getAddress(), context.getDbAddress(), action.getUuid(), session.getId(),
-                    this, auth.getLogin(), encodedPassword);
+                Message message;
+                if (SIGNUP_ACTION.equals(action.getAction())) {
+                    message = new MsgSaveUser(getAddress(), context.getDbAddress(), action.getUuid(), session.getId(),
+                        this, auth.getLogin(), encodedPassword);
+                } else {
+                    message = new MsgGetUser(getAddress(), context.getDbAddress(), action.getUuid(), session.getId(),
+                        this, auth.getLogin(), encodedPassword);
+                }
                 sendMessage(message);
                 break;
             default:
@@ -98,17 +104,20 @@ public class FrontendServiceImpl extends TextWebSocketHandler implements Fronten
 
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage text) {
+        Action action;
+        String uuid = UUID.UNKNOWN;
         try {
-            Action action = mapper.parse(text.getPayload());
+            action = mapper.parse(text.getPayload());
+            uuid = action.getUuid();
             if (!validateRequest(action, session)) {
                 // TODO: log me
                 throw new WebSocketError(ErrorCode.WS_MESSAGE_NOT_VALID);
             }
             handleRequest(action, session);
         } catch (WebSocketError e) {
-            handleException(e, session);
+            handleException(e, session, uuid);
         } catch (Exception e) {
-            handleException(new WebSocketError(ErrorCode.UNKNOWN, e), session);
+            handleException(new WebSocketError(ErrorCode.UNKNOWN, e), session, uuid);
         }
     }
 
@@ -123,12 +132,8 @@ public class FrontendServiceImpl extends TextWebSocketHandler implements Fronten
         return error;
     }
 
-    private ErrorAction prepareErrorAction(WebSocketError e) {
-        return prepareErrorAction(e, UUIDs.MIRACAST);
-    }
-
-    private void handleException(WebSocketError e, WebSocketSession session) {
-        sendWSMessage(mapper.serialize(prepareErrorAction(e)), session);
+    private void handleException(WebSocketError e, WebSocketSession session, String uuid) {
+        sendWSMessage(mapper.serialize(prepareErrorAction(e, uuid)), session);
     }
 
     @Override

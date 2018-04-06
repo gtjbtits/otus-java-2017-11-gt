@@ -11,6 +11,6 @@ import org.springframework.web.socket.WebSocketSession;
 public interface FrontendService extends Addressee, WebSocketHandler {
     void init();
 
-    void addUser(long userId, String uuid, String sessionId);
+    void registerUser(long userId, String uuid, String sessionId);
 }
 
