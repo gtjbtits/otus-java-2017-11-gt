@@ -10,6 +10,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 public class PageController {
     @RequestMapping(method = RequestMethod.GET)
     public String printStatistics(ModelMap model) {
-        return "chat";
+        return "index";
     }
 }

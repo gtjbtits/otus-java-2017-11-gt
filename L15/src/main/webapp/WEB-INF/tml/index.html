@@ -1,0 +1,63 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+        <meta name="HandheldFriendly" content="true" />
+        <title>Web Socket Test</title>
+        <link href="static/css/style.css" rel="stylesheet" />
+        <script src="static/lib/js/jquery.min.js"></script>
+        <script src="static/js/jcookie.js"></script>
+        <!--<script src="/socket.io/socket.io.js"></script>-->
+        <script src="static/js/core.js"></script>
+        <link rel="shortcut icon" href="static/favicon.ico" type="image/x-icon">
+    </head>
+    <body>
+        <table cellspacing="0" cellpadding="10" height="100%" width="100%" class="alltable">
+            <tr>
+                <td valign="top" id="o-cont">
+                    <div id="output"></div>
+                </td>
+                <!--<td width="150" valign="top" id="right-bar">-->
+                    <!--Who is here?-->
+                    <!--<ul id="participants">-->
+                    <!--</ul>-->
+                <!--</td>-->
+            </tr>
+            <!--<tr>-->
+                <!--<td height="100" id="info-cont">-->
+                    <!--<div class="info">-->
+                        <!--This is a basic chat application written in <a href="http://nodejs.org">Node.js</a>,-->
+                        <!--<a href="http://socket.io/">Socket.IO</a> and <a href="http://expressjs.com/">Express.js</a>-->
+                        <!--<br>-->
+                        <!--You can access the <a href="https://github.com/serkanyersen/Basic-Chat">source code on github</a>,-->
+                        <!--it's freely available, you can use it however you like.-->
+                    <!--</div>-->
+                <!--</td>-->
+            <!--</tr>-->
+            <tr>
+                <td colspan="2" height="100" id="entry-cont">
+                    <!--<div style="position:relative">-->
+                    <div>
+                        <div id="name-cont">
+                            <form id="enter-chat-form" onsubmit="return false;">
+                                <div class="form-error"></div>
+                                <div>Signin or signup before chatting</div>
+                                <label><input type="text" id="login" />Login</label>
+                                <label><input type="password" id=password />Password</label>
+                                <div>Signin or signup?</div>
+                                <label><input name="authtype" type="radio" value="signup" checked="checked"/>I wanna log in with my credentials (signin)</label>
+                                <label><input name="authtype" type="radio" value="signin" />I wanna create new user (signup)</label>
+                                <input id="enter-chat" type="submit" value="Enter chat" />
+                            </form>
+                        </div>
+                        <textarea placeholder="Please write..." disabled="true" id="entry"></textarea>
+                    </div>
+                    <div id="writing"></div>
+                </td>
+            </tr>
+        </table>
+    </body>
+
+</html>
