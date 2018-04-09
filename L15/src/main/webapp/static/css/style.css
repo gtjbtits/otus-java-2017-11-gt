@@ -172,8 +172,34 @@ body {
     border-bottom:none;
 }
 
+#enter-chat-form {
+    left: calc(50% - 170px);
+    top: calc(50% - 120px);
+    position: relative;
+    line-height: 30px;
+}
+
+#enter-chat-form label {
+    display: block;
+    padding-left: 10px;
+}
+
+#enter-chat-form label input[type=text], #enter-chat-form label input[type=password] {
+    position: absolute;
+    left: 100px;
+}
+
+#enter-chat-form h1 {
+    font-size: 200%;
+    margin-bottom: 20px;
+}
+
 .form-error {
-    
+    color: red;
+}
+
+.my-message {
+    font-weight: 700;
 }
 
 #name-cont{
@@ -181,7 +207,6 @@ body {
     bottom: -10px;
     color: #FFFFFF;
     left: -10px;
-    line-height: 90px;
     padding-left: 50px;
     position: absolute;
     right: -10px;

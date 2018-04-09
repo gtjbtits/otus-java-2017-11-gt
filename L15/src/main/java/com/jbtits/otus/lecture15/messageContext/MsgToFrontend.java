@@ -1,6 +1,6 @@
-package com.jbtits.otus.lecture15.app;
+package com.jbtits.otus.lecture15.messageContext;
 
-import com.jbtits.otus.lecture15.app.messages.SessionMessage;
+import com.jbtits.otus.lecture15.messageContext.messages.SessionMessage;
 import com.jbtits.otus.lecture15.front.FrontendService;
 import com.jbtits.otus.lecture15.front.webSocket.ErrorCode;
 import com.jbtits.otus.lecture15.front.webSocket.WebSocketError;

@@ -1,6 +1,6 @@
-package com.jbtits.otus.lecture15.app.messages;
+package com.jbtits.otus.lecture15.messageContext.messages;
 
-import com.jbtits.otus.lecture15.app.MsgToDB;
+import com.jbtits.otus.lecture15.messageContext.MsgToDB;
 import com.jbtits.otus.lecture15.dataSets.UserDataSet;
 import com.jbtits.otus.lecture15.dbService.DBService;
 import com.jbtits.otus.lecture15.front.webSocket.ErrorCode;
@@ -32,6 +32,6 @@ public class MsgGetUser extends MsgToDB {
         if (!user.getPassword().equals(password)) {
             throw new WebSocketError(ErrorCode.DB_USER_PASSWORD_MISMATCH);
         }
-        dbService.getMS().sendMessage(new MsgUserIdAnswer(getTo(), getFrom(), getUuid(), getSessionId(), getErrorHandler(), user.getId()));
+        dbService.getMS().sendMessage(new MsgSaveUserAnswer(getTo(), getFrom(), getUuid(), getSessionId(), getErrorHandler(), user.getId()));
     }
 }

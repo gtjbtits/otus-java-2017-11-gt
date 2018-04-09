@@ -2,17 +2,25 @@
 (function(){
 const WS_ENDPOINT_URL = "ws://" + window.location.host + window.location.pathname + "ws";
 const SIGNIN = "signin";
+const ERROR_UNKNOWN = "1";
+const ERROR_USER_ALREADY_EXISTS = "101";
+const ERROR_USER_NOT_FOUND = "102";
+const ERROR_USER_PASSWORD_MISMATCH = "103";
 
 var createWebSocket = function(options) {
-    const UNKNOWN_UUID = "unknown";
-    const BROADCAST_UUID = "broadcast";
+    const UUID_UNKNOWN = "unknown";
+    const UUID_BROADCAST = "broadcast";
     const MESSAGE_HANDLING_TIMEOUT_MS = 5000;
-    const MESSAGE_ERROR_ACTION = "error";
-    const MESSAGE_SIGNUP_ACTION = "signup";
-    const MESSAGE_SIGNIN_ACTION = "signin";
+    const ACTION_ERROR = "error";
+    const ACTION_SIGNUP = "signup";
+    const ACTION_SIGNIN = "signin";
+    const ACTION_CLIENT_MESSAGE = "client_message";
+    const ACTION_SERVER_MESSAGE = "server_message";
 
     options = options || {
-        url: ""
+        url: "",
+        onUserMessage: function () {},
+        onError: function () {}
     };
 
     var ws = new WebSocket(options.url);
@@ -20,20 +28,27 @@ var createWebSocket = function(options) {
 
     var handleAddressedMessage = function(message, stored) {
         clearTimeout(stored.timeout);
-        if (message.action === MESSAGE_ERROR_ACTION) {
+        if (message.action === ACTION_ERROR) {
             stored.error(message);
         } else {
             stored.success(message);
         }
     };
 
+    function handleBroadcastMessage(message) {
+        if (message.action === ACTION_SERVER_MESSAGE) {
+            options.onUserMessage(message);
+        }
+    }
+
     var handleMessage = function(event) {
         var message = JSON.parse(event.data);
-        // TODO: unknown, broadcast
         if (processingUUIDs[message.uuid]) {
             handleAddressedMessage(message, processingUUIDs[message.uuid]);
+        } else if (message.uuid === UUID_BROADCAST) {
+            handleBroadcastMessage(message);
         } else {
-            console.log("TODO: unknown, broadcast");
+            options.onError(message);
         }
     };
 
@@ -50,7 +65,12 @@ var createWebSocket = function(options) {
     };
 
     var sendMessage = function(action, json, onSuccess, onError) {
+        onError = onError || options.onError;
+        onSuccess = onSuccess || function () {};
         var message = prepareMessage(action, json);
+        if (ws.readyState !== ws.OPEN) {
+            return options.onError({message: "Network connection error"});
+        }
         ws.send(JSON.stringify(message));
         processingUUIDs[message.uuid] = {
             timeout: setTimeout(onError, MESSAGE_HANDLING_TIMEOUT_MS),
@@ -60,29 +80,35 @@ var createWebSocket = function(options) {
     };
 
     var signup = function(login, password, onSuccess, onError) {
-        sendMessage(MESSAGE_SIGNUP_ACTION, {
+        sendMessage(ACTION_SIGNUP, {
             login: login,
             password: password
         }, onSuccess, onError);
     };
 
     var signin = function(login, password, onSuccess, onError) {
-        sendMessage(MESSAGE_SIGNIN_ACTION, {
+        sendMessage(ACTION_SIGNIN, {
             login: login,
             password: password
         }, onSuccess, onError);
+    };
+
+    var text = function(text) {
+        sendMessage(ACTION_CLIENT_MESSAGE, {
+            message: text
+        }, options.onUserMessage);
     };
 
     ws.onmessage = handleMessage;
 
     return {
         signup: signup,
-        signin: signin
+        signin: signin,
+        message: text
     };
 }
 
 var Chat = {
-    name: '',
     colors: {},
     socket: undefined,
     lastMessage: '',
@@ -109,58 +135,45 @@ var Chat = {
         return this.colors[user];
     },
     
-    onMessage: function(mes){
-        var e = JSON.parse(mes);
-        
-        if (e.writing === undefined) {
-            if($('#output div:last-child').hasClass('user-'+e.user)){
-                $('#output div:last-child').append('<pre>' + this.escapeHTML(e.message) + '</pre>');
+    onMessage: function(message){
+          var isMyMessage = message.name === undefined || message.name === $.cookie('login');
+          var userName = !isMyMessage ? message.name : "me";
+            if($('#output div:last-child').hasClass('user-'+userName)){
+                $('#output div:last-child').append('<pre>' + this.escapeHTML(message.message) + '</pre>');
             }else{
-                $('#output').append('<div><div class="color-box" style="background:'+this.getUserColor(e.user)+'"></div><b>' + this.escapeHTML(e.user) + '</b>: <pre>' + this.escapeHTML(e.message) + '</pre></div>');
+                $('#output').append('<div><div class="color-box" style="background:'+this.getUserColor(userName)+'"></div><span class="' + (isMyMessage ? "my-message" : "") + '">' + this.escapeHTML(userName) + '</span>: <pre>' + this.escapeHTML(message.message) + '</pre></div>');
             }
             $('#output').scrollTop($('#output')[0].scrollHeight);
-        } else if (e.writing === true) {
-            if(e.user === this.name){ return; /* don't print my status */ }
-            $('#ww-' + this.fixUserName(e.user)).remove();
-            $('#writing').append('<div id="ww-' + this.fixUserName(e.user) + '">' + this.escapeHTML(e.user) + ' is writing...</div>');
-        } else if (e.writing === false) {
-            $('#ww-' + this.fixUserName(e.user)).remove();
-        } else {
-            $('#output').append(mes);
-            $('#output').scrollTop($('#output')[0].scrollHeight);
-        }
-    },
-    
-    setSocketEvents: function(){
-        this.socket.on('message', $.proxy(this.onMessage, this));
     },
     
     enterChat: function(){
         $('#login').val($.cookie('login') || '');
         var $this = this;
         $('#enter-chat').click(function(){
+            var $formError = $(".form-error");
             var login = $('#login').val().trim();
             var password = $('#password').val().trim();
             var authtype = $('input[name=authtype]:checked', '#enter-chat-form').val();
             var onSuccess = function(message) {
                 $('#entry').attr('disabled', false);
-                $.cookie('login', $this.name);
+                $.cookie('login', login);
                 $('#name-cont').remove();
+                $formError.empty();
             };
             var onError = function (message) {
-                alert(message);
+                switch (message.message) {
+                    case ERROR_USER_NOT_FOUND:
+                    case ERROR_USER_PASSWORD_MISMATCH:
+                        $formError.text("Wrong login/password");
+                        break;
+                    case ERROR_USER_ALREADY_EXISTS:
+                        $formError.text("This login is already used by some other user. Choose another one, please");
+                        break;
+                    default:
+                        $formError.text("Unknown error");
+                        break;
+                }
             };
-//            if(name.length < 2){ return alert('Please enter a valid name'); }
-//            if(name.length > 20){ return alert('Name is too long'); }
-//            var p = $('#participants li');
-//
-//            for(var i=0; i < p.length; i++){
-//                if(p[i].innerHTML == name){
-//                    return alert('This name is already used. Please choose another one.');
-//                }
-//            }
-            
-//            $this.name = $this.escapeHTML(name);
             if (authtype === SIGNIN) {
                 $this.socket.signin(login, password, onSuccess, onError);
             } else {
@@ -169,110 +182,37 @@ var Chat = {
         });
     },
     
-    send: function(object, str){
-        this.socket.send(JSON.stringify(object));
-        if(str !== ''){
-            $('#output').append(str || object.message);
-            $('#output').scrollTop($('#output')[0].scrollHeight);
-        } 
-    },
-    
     escapeHTML: function(html){
         return html.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-    },
-    
-    joined: function(){
-        this.socket.emit('join',{
-            name: this.name
-        });
     },
     
     setKeyEvent: function(){
         var entry = $('#entry');
         var $this = this;
-        var time = 0;
         entry.keyup(function(e) {
             if (e.keyCode == 13) {
-                $this.send({
-                    user: $this.name,
-                    message: entry.val()
-                }, '');
-                $this.lastMessage = entry.val();
+                var message = entry.val();
+                message = message.substring(0, message.length - 1); // last "enter" char after send message key
+                $this.socket.message(message);
+                $this.lastMessage = message;
                 entry.val('');
             }
-            
-            clearTimeout(time);
-            time = setTimeout(function(){
-                $this.send({
-                    user: $this.name,
-                    writing: (entry.val().trim() !== '')
-                }, '');    
-            }, 200);
-        });
-    },
-    
-    onServerMessage: function(){
-        var $this = this;
-        this.socket.on('serverMessage', function(data){
-            $('#output').append('<div class="info-text" style="color:gold">' + $this.escapeHTML(data.message) + '</div>');
-            $('#entry').val($this.lastMessage);
-        });
-    },
-    
-    participants: function(){
-        var $this = this;
-        this.socket.on('join', function(data){
-            if(data.name){
-                $('#output').append('<div class="info-text">' + $this.escapeHTML(data.name) + ' has joined the chat</div>');
-            }
-        });
-        
-        this.socket.on('leave', function(data){
-            if(data.name){
-                $('#output').append('<div class="info-text">' + $this.escapeHTML(data.name) + ' has left the chat</div>');
-            }
-        });
-        
-        this.socket.on('updateParticipantList', function(data){
-            $('#participants').html('');
-            for(var i in data.list){
-                if(data.list[i]){
-                    $('#participants').append('<li style="color:'+$this.getUserColor(data.list[i])+'" >'+data.list[i]+'</li>');
-                }
-            }
-        });
-        
-    },
-
-    setOutputHeight: function(){
-        var o = $('#output'), c = $('#o-cont');
-        var calc = function(){
-            o.css('display', 'none');
-            var h = c.height()+parseFloat(c.css('padding-top'))+parseFloat(c.css('padding-bottom'));
-            o.css('display', '');
-            o.css('height', h);
-        };
-        
-        calc();
-        var t;
-        $(window).resize(function(){
-            calc();
-            clearTimeout(t);
-            t = setTimeout(function(){ calc(); }, 100); // Resize may happen really fast
         });
     },
     
     init: function(){
-//        this.socket = io.connect(location.hostname + ":1337");
+        $this = this;
         this.socket = createWebSocket({
-            url: WS_ENDPOINT_URL
+            url: WS_ENDPOINT_URL,
+            onUserMessage: function (message) {
+                $this.onMessage(message);
+            },
+            onError: function (message) {
+                console.error(message.message, message.trace);
+            }
         });
-//        this.setSocketEvents();
         this.enterChat();
-//        this.participants();
-//        this.setKeyEvent();
-//        this.setOutputHeight();
-//        this.onServerMessage();
+        this.setKeyEvent();
     }
 };
 

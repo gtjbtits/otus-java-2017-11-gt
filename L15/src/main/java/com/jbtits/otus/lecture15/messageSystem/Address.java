@@ -35,4 +35,11 @@ public final class Address {
     public String getId() {
         return id;
     }
+
+    @Override
+    public String toString() {
+        return "Address{" +
+                "id='" + id + '\'' +
+                '}';
+    }
 }

@@ -16,7 +16,6 @@ public class Action {
 
     public Action() {
         this.timestamp = System.currentTimeMillis();
-//        this.uuid = UUID.randomUUID().toString();
     }
 
     public Action(String uuid, String action) {

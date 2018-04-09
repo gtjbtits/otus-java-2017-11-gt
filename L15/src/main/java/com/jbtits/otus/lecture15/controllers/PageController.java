@@ -1,4 +1,4 @@
-package com.jbtits.otus.lecture15.web;
+package com.jbtits.otus.lecture15.controllers;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;

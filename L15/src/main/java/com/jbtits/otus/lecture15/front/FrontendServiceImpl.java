@@ -1,9 +1,9 @@
 package com.jbtits.otus.lecture15.front;
 
-import com.jbtits.otus.lecture15.app.MessageSystemContext;
-import com.jbtits.otus.lecture15.app.messages.MsgGetUser;
-import com.jbtits.otus.lecture15.app.messages.MsgSaveMessage;
-import com.jbtits.otus.lecture15.app.messages.MsgSaveUser;
+import com.jbtits.otus.lecture15.messageContext.MessageSystemContext;
+import com.jbtits.otus.lecture15.messageContext.messages.MsgGetUser;
+import com.jbtits.otus.lecture15.messageContext.messages.MsgSaveMessage;
+import com.jbtits.otus.lecture15.messageContext.messages.MsgSaveUser;
 import com.jbtits.otus.lecture15.front.webSocket.*;
 import com.jbtits.otus.lecture15.front.webSocket.messages.*;
 import com.jbtits.otus.lecture15.messageSystem.Address;
@@ -20,9 +20,6 @@ import java.util.Date;
 import static com.jbtits.otus.lecture15.front.webSocket.WebSocketMessageMapperImpl.*;
 import static org.apache.commons.lang.exception.ExceptionUtils.getStackTrace;
 
-/**
- * Created by tully.
- */
 public class FrontendServiceImpl extends TextWebSocketHandler implements FrontendService, WebSocketErrorHandler {
     private final Address address;
     private final MessageSystemContext context;
@@ -59,8 +56,8 @@ public class FrontendServiceImpl extends TextWebSocketHandler implements Fronten
 
     @Override
     public void broadcastMessageToClients(String uuid, String sessionId, String message, String userName, Date created) {
-        String broadcast = mapper.serialize(new BroadcastMessage(UUID.BROADCAST, SERVER_MESSAGE, message, created.getTime(), userName));
-        String response = mapper.serialize(new DateMessage(uuid, SERVER_MESSAGE, message, created.getTime()));
+        String broadcast = mapper.serialize(new BroadcastMessage(UUID.BROADCAST, SERVER_MESSAGE_ACTION, message, created.getTime(), userName));
+        String response = mapper.serialize(new DateMessage(uuid, SERVER_MESSAGE_ACTION, message, created.getTime()));
         for (WebSocketSession session : registry.getUserSessions()) {
             if (session.getId().equals(sessionId)) {
                 sendWSMessage(response, session);
@@ -91,7 +88,6 @@ public class FrontendServiceImpl extends TextWebSocketHandler implements Fronten
         if (mapper.isUnauthClientAction(action.getAction())) {
             return !isRegistered;
         }
-        // TODO: token auth (regenerate session, if connection was broken)
         return isRegistered;
     }
 
@@ -111,13 +107,12 @@ public class FrontendServiceImpl extends TextWebSocketHandler implements Fronten
                         this, auth.getLogin(), encodedPassword);
                 }
                 break;
-            case CLIENT_MESSAGE:
+            case CLIENT_MESSAGE_ACTION:
                 MessageAction clientMessage = (MessageAction) action;
                 message = new MsgSaveMessage(getAddress(), context.getDbAddress(), action.getUuid(), session.getId(),
                     this, clientMessage.getMessage(), registry.getUserId(session.getId()));
                 break;
             default:
-                // TODO: log
                 throw new WebSocketError(ErrorCode.UNSUPPORTED_ACTION);
         }
         sendMessage(message);
@@ -140,7 +135,6 @@ public class FrontendServiceImpl extends TextWebSocketHandler implements Fronten
             action = mapper.parse(text.getPayload());
             uuid = action.getUuid();
             if (!validateRequest(action, session)) {
-                // TODO: log me
                 throw new WebSocketError(ErrorCode.ACTION_VALIDATION_FAILED);
             }
             handleRequest(action, session);

@@ -1,4 +1,4 @@
-package com.jbtits.otus.lecture15.app.messages;
+package com.jbtits.otus.lecture15.messageContext.messages;
 
 import com.jbtits.otus.lecture15.front.webSocket.WebSocketErrorHandler;
 import com.jbtits.otus.lecture15.messageSystem.Address;

@@ -1,6 +1,6 @@
-package com.jbtits.otus.lecture15.app.messages;
+package com.jbtits.otus.lecture15.messageContext.messages;
 
-import com.jbtits.otus.lecture15.app.MsgToDB;
+import com.jbtits.otus.lecture15.messageContext.MsgToDB;
 import com.jbtits.otus.lecture15.dbService.DBService;
 import com.jbtits.otus.lecture15.dataSets.UserDataSet;
 import com.jbtits.otus.lecture15.front.webSocket.ErrorCode;
@@ -33,6 +33,6 @@ public class MsgSaveUser extends MsgToDB {
         newUser.setPassword(password);
         dbService.saveUser(newUser);
         UserDataSet user = dbService.getUserByName(login);
-        dbService.getMS().sendMessage(new MsgUserIdAnswer(getTo(), getFrom(), getUuid(), getSessionId(), getErrorHandler(), user.getId()));
+        dbService.getMS().sendMessage(new MsgSaveUserAnswer(getTo(), getFrom(), getUuid(), getSessionId(), getErrorHandler(), user.getId()));
     }
 }

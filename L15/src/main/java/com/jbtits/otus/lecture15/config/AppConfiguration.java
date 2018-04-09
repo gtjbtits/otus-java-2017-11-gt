@@ -1,7 +1,7 @@
 package com.jbtits.otus.lecture15.config;
 
 import com.jbtits.otus.lecture15.front.FrontendService;
-import com.jbtits.otus.lecture15.app.MessageSystemContext;
+import com.jbtits.otus.lecture15.messageContext.MessageSystemContext;
 import com.jbtits.otus.lecture15.cache.CacheService;
 import com.jbtits.otus.lecture15.cache.CacheServiceImpl;
 import com.jbtits.otus.lecture15.dbService.DBService;
@@ -32,7 +32,8 @@ public class AppConfiguration implements WebSocketConfigurer {
     @PostConstruct
     public void startMessageSystem() {
         frontendService().init();
-        dbService().init();
+        dbService1().init();
+        dbService2().init();
         messageSystem().start();
     }
 
@@ -47,15 +48,21 @@ public class AppConfiguration implements WebSocketConfigurer {
     }
 
     @Bean
-    public Address dbAddress() {
-        return new Address("db");
+    public Address db1Address() {
+        return new Address("db1");
+    }
+
+    @Bean
+    public Address db2Address() {
+        return new Address("db2");
     }
 
     @Bean
     public MessageSystemContext messageSystemContext() {
         MessageSystemContext context = new MessageSystemContext(messageSystem());
         context.setFrontAddress(frontAddress());
-        context.setDbAddress(dbAddress());
+        context.setDbAddress1(db1Address());
+        context.setDbAddress2(db2Address());
         return context;
     }
 
@@ -65,8 +72,13 @@ public class AppConfiguration implements WebSocketConfigurer {
     }
 
     @Bean
-    public DBService dbService() {
-        return new DBServiceHibernateImpl(cacheService(), messageSystemContext(), dbAddress());
+    public DBService dbService1() {
+        return new DBServiceHibernateImpl(cacheService(), messageSystemContext(), db1Address());
+    }
+
+    @Bean
+    public DBService dbService2() {
+        return new DBServiceHibernateImpl(cacheService(), messageSystemContext(), db2Address());
     }
 
     @Override
@@ -86,7 +98,7 @@ public class AppConfiguration implements WebSocketConfigurer {
 
     @Bean
     public SecurityService securityService() {
-        return new SecurityServiceImpl("VR#%#$54er21!!_fe");
+        return new SecurityServiceImpl("OTUS_Java");
     }
 
     @Bean

@@ -24,8 +24,8 @@ public class WebSocketMessageMapperImpl implements WebSocketMessageMapper {
     public final static String SIGNUP_RESPONSE_ACTION = "signup_response";
     public final static String SIGNIN_ACTION = "signin";
     public final static String SIGNIN_RESPONSE_ACTION = "signin_response";
-    public final static String CLIENT_MESSAGE = "client_message";
-    public final static String SERVER_MESSAGE = "server_message";
+    public final static String CLIENT_MESSAGE_ACTION = "client_message";
+    public final static String SERVER_MESSAGE_ACTION = "server_message";
 
     private final static String supportedUnauthClientActions[] = {
         SIGNUP_ACTION,
@@ -33,7 +33,7 @@ public class WebSocketMessageMapperImpl implements WebSocketMessageMapper {
     };
 
     private final static String supportedAuthClientActions[] = {
-            CLIENT_MESSAGE
+        CLIENT_MESSAGE_ACTION
     };
 
     private final ObjectMapper mapper;
@@ -50,8 +50,8 @@ public class WebSocketMessageMapperImpl implements WebSocketMessageMapper {
         actions.put(SIGNIN_ACTION, AuthAction.class);
         actions.put(SIGNUP_RESPONSE_ACTION, SuccessAction.class);
         actions.put(SIGNIN_RESPONSE_ACTION, SuccessAction.class);
-        actions.put(CLIENT_MESSAGE, MessageAction.class);
-        actions.put(SERVER_MESSAGE, MessageAction.class);
+        actions.put(CLIENT_MESSAGE_ACTION, MessageAction.class);
+        actions.put(SERVER_MESSAGE_ACTION, MessageAction.class);
     }
 
     public <T extends Action> T parse(String json) {

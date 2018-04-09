@@ -1,6 +1,6 @@
 package com.jbtits.otus.lecture15.dbService;
 
-import com.jbtits.otus.lecture15.app.MessageSystemContext;
+import com.jbtits.otus.lecture15.messageContext.MessageSystemContext;
 import com.jbtits.otus.lecture15.cache.CacheService;
 import com.jbtits.otus.lecture15.dataSets.*;
 import com.jbtits.otus.lecture15.dbService.dao.MessageDataSetDAO;
@@ -15,7 +15,6 @@ import org.hibernate.cfg.Configuration;
 import org.hibernate.service.ServiceRegistry;
 
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 public class DBServiceHibernateImpl extends CacheableDBService implements DBService {
     private final SessionFactory sessionFactory;
@@ -40,8 +39,6 @@ public class DBServiceHibernateImpl extends CacheableDBService implements DBServ
 
         configuration.addAnnotatedClass(UserDataSet.class);
         configuration.addAnnotatedClass(MessageDataSet.class);
-        configuration.addAnnotatedClass(AddressDataSet.class);
-        configuration.addAnnotatedClass(PhoneDataSet.class);
 
         configuration.setProperty("hibernate.dialect", "org.hibernate.dialect.H2Dialect");
         configuration.setProperty("hibernate.connection.driver_class", "org.h2.Driver");
@@ -65,12 +62,6 @@ public class DBServiceHibernateImpl extends CacheableDBService implements DBServ
 
     @Override
     public void saveUser(UserDataSet user) {
-//        long id = executor.runInSession(session -> {
-//            UserDataSetDAO dao = new UserDataSetDAO(session);
-//            return dao.save(user);
-//        });
-//        user.setId(id);
-//        cachePut(id, user);
         save(user, session -> {
             UserDataSetDAO dao = new UserDataSetDAO(session);
             return dao.save(user);
@@ -80,16 +71,9 @@ public class DBServiceHibernateImpl extends CacheableDBService implements DBServ
     @Override
     public void saveMessage(MessageDataSet message, long userId) {
         save(message, session -> {
-//            UserDataSetDAO userDAO = new UserDataSetDAO(session);
             MessageDataSetDAO messageDAO = new MessageDataSetDAO(session);
             return messageDAO.save(message, userId);
         });
-//        long id = executor.runInSession(session -> {
-//            MessageDataSetDAO dao = new MessageDataSetDAO(session);
-//            return dao.save(message);
-//        });
-//        message.setId(id);
-//        cachePut(id, message);
     }
 
     private <T extends DataSet> void save(T dataSet, Function<Session, Long> callDAO) {

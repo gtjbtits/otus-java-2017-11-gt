@@ -1,9 +1,6 @@
-package com.jbtits.otus.lecture15.app.messages;
+package com.jbtits.otus.lecture15.messageContext.messages;
 
-import com.jbtits.otus.lecture15.app.MsgToDB;
-import com.jbtits.otus.lecture15.app.MsgToFrontend;
-import com.jbtits.otus.lecture15.dataSets.MessageDataSet;
-import com.jbtits.otus.lecture15.dbService.DBService;
+import com.jbtits.otus.lecture15.messageContext.MsgToFrontend;
 import com.jbtits.otus.lecture15.front.FrontendService;
 import com.jbtits.otus.lecture15.front.webSocket.WebSocketErrorHandler;
 import com.jbtits.otus.lecture15.messageSystem.Address;

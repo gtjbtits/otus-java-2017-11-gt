@@ -73,3 +73,11 @@ Controller mapped to the root URL.
 mvn test
 ```
 
+### L15: Simple WebSocket chat based on MessageSystem
+```bash
+mvn package
+```
+Will outputs: `L15/target/chat.war`. Please, deploy it to the yours external Jetty server.
+Controller mapped to the root URL.
+Frontend: https://github.com/serkanyersen/Basic-Chat
+
