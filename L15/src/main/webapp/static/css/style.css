@@ -173,8 +173,6 @@ body {
 }
 
 #enter-chat-form {
-    left: calc(50% - 170px);
-    top: calc(50% - 120px);
     position: relative;
     line-height: 30px;
 }
@@ -204,13 +202,14 @@ body {
 
 #name-cont{
     background: none repeat scroll 0 0 rgba(0, 0, 0, 0.7);
-    bottom: -10px;
+    bottom: 0;
     color: #FFFFFF;
-    left: -10px;
+    left: 0;
     padding-left: 50px;
+    padding-top: 50px;
     position: absolute;
-    right: -10px;
-    top: -10px;    
+    right: 0;
+    top: 0;
 }
 
 .info{
