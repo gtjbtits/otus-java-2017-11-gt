@@ -1,0 +1,45 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+        <meta name="HandheldFriendly" content="true" />
+        <title>Web Socket Test</title>
+        <link href="static/css/style.css" rel="stylesheet" />
+        <script src="static/lib/js/jquery.min.js"></script>
+        <script src="static/js/jcookie.js"></script>
+        <script src="static/js/core.js"></script>
+        <link rel="shortcut icon" href="static/favicon.ico" type="image/x-icon">
+    </head>
+    <body>
+        <table cellspacing="0" cellpadding="10" height="100%" width="100%" class="alltable">
+            <tr>
+                <td valign="top" id="o-cont">
+                    <div id="output"></div>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2" height="100" id="entry-cont">
+                    <div>
+                        <div id="name-cont">
+                            <form id="enter-chat-form" onsubmit="return false;">
+                                <h1>Signin or signup before chatting</h1>
+                                <label>Login: <input type="text" id="login" /></label>
+                                <label>Password: <input type="password" id=password /></label>
+                                <div>Signin or signup?</div>
+                                <label><input name="authtype" type="radio" value="signin" checked="checked"/>I wanna log in with my credentials (signin)</label>
+                                <label><input name="authtype" type="radio" value="signup" />I wanna create new user (signup)</label>
+                                <input id="enter-chat" type="submit" value="Enter chat" />
+                                <div class="form-error"></div>
+                            </form>
+                        </div>
+                        <textarea placeholder="Please write..." disabled="true" id="entry"></textarea>
+                    </div>
+                    <div id="writing"></div>
+                </td>
+            </tr>
+        </table>
+    </body>
+
+</html>
