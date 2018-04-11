@@ -7,10 +7,9 @@ import com.jbtits.otus.lecture16.ms.app.ClientType;
 import com.jbtits.otus.lecture16.ms.app.Msg;
 import com.jbtits.otus.lecture16.ms.app.MsgWorker;
 import com.jbtits.otus.lecture16.ms.channel.ClientSocketMsgWorker;
-import com.jbtits.otus.lecture16.ms.messages.HandshakeMsg;
-import com.jbtits.otus.lecture16.ms.messages.HandshakeResponseMsg;
-import com.jbtits.otus.lecture16.ms.messages.SignupMsg;
-import com.jbtits.otus.lecture16.ms.messages.SignupResponseMsg;
+import com.jbtits.otus.lecture16.ms.messages.*;
+import com.jbtits.otus.lecture16.ms.messages.error.ErrorCode;
+import com.jbtits.otus.lecture16.ms.messages.error.ErrorMsg;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
@@ -26,9 +25,7 @@ import java.util.function.BiConsumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static com.jbtits.otus.lecture16.frontend.webSocket.WebSocketMessageMapperImpl.SERVER_MESSAGE_ACTION;
-import static com.jbtits.otus.lecture16.frontend.webSocket.WebSocketMessageMapperImpl.SIGNUP_ACTION;
-import static com.jbtits.otus.lecture16.frontend.webSocket.WebSocketMessageMapperImpl.SIGNUP_RESPONSE_ACTION;
+import static com.jbtits.otus.lecture16.frontend.webSocket.WebSocketMessageMapperImpl.*;
 import static org.apache.commons.lang.exception.ExceptionUtils.getStackTrace;
 
 public class FrontendServiceImpl extends TextWebSocketHandler implements FrontendService {
@@ -61,12 +58,36 @@ public class FrontendServiceImpl extends TextWebSocketHandler implements Fronten
         startClientReciever();
 
         handlers.put(SignupResponseMsg.class, handleSignupResp());
+        handlers.put(SigninResponseMsg.class, handleSigninResp());
+        handlers.put(BroadcastMessageMsg.class, handleBroadcastMessage());
+        handlers.put(ErrorMsg.class, handleError());
     }
 
     private BiConsumer<Msg, MsgWorker> handleSignupResp() {
         return (message, client) -> {
             SignupResponseMsg signupResponseMsg = (SignupResponseMsg) message;
-            logger.log(Level.INFO, "SignUp resp " + signupResponseMsg.isSuccess());
+            registerUser(signupResponseMsg.getUserId(), signupResponseMsg.getUuid());
+        };
+    }
+
+    private BiConsumer<Msg, MsgWorker> handleSigninResp() {
+        return (message, client) -> {
+            SigninResponseMsg signinResponseMsg = (SigninResponseMsg) message;
+            registerUser(signinResponseMsg.getUserId(), signinResponseMsg.getUuid());
+        };
+    }
+
+    private BiConsumer<Msg, MsgWorker> handleBroadcastMessage() {
+        return (message, client) -> {
+            BroadcastMessageMsg broadcastMessageMsg = (BroadcastMessageMsg) message;
+            broadcastMessageToClients(message.getUuid(), registry.getSessionIdByUuid(message.getUuid()), broadcastMessageMsg.getText(), broadcastMessageMsg.getUserName(), broadcastMessageMsg.getCreated());
+        };
+    }
+
+    private BiConsumer<Msg, MsgWorker> handleError() {
+        return (message, client) -> {
+            ErrorMsg errorMsg = (ErrorMsg) message;
+            sendWSMessage(mapper.serialize(prepareErrorAction(errorMsg.getCause(), message.getUuid())), registry.getSession(registry.getSessionIdByUuid(message.getUuid())));
         };
     }
 
@@ -110,7 +131,8 @@ public class FrontendServiceImpl extends TextWebSocketHandler implements Fronten
     }
 
     @Override
-    public void registerUser(long userId, String uuid, String sessionId) {
+    public void registerUser(long userId, String uuid) {
+        String sessionId = registry.getSessionIdByUuid(uuid);
         registry.setUserSession(sessionId, userId);
         Action action = new SuccessAction(uuid, SIGNUP_RESPONSE_ACTION, true);
         String json = mapper.serialize(action);
@@ -150,34 +172,34 @@ public class FrontendServiceImpl extends TextWebSocketHandler implements Fronten
     }
 
     private void handleRequest(Action action, WebSocketSession session) {
-        registry.register(session);
+        registry.register(session, action.getUuid());
         switch (action.getAction()) {
             case SIGNUP_ACTION:
-//            case SIGNIN_ACTION:
+            case SIGNIN_ACTION:
                 AuthAction auth = (AuthAction) action;
                 String encodedPassword = security.encodePassword(auth.getPassword());
-                SignupMsg signupMsg = new SignupMsg(action.getUuid(), auth.getLogin(), encodedPassword);
-                signupMsg.setFrom(address);
-                signupMsg.setTo(new Address(ClientType.DB_SERVICE));
-                client.send(signupMsg);
-                logger.log(Level.INFO, "Message sent " + signupMsg.getUuid());
-//                if (SIGNUP_ACTION.equals(action.getAction())) {
-//                    message = new MsgSaveUser(getAddress(), context.getDbAddress(), action.getUuid(), session.getId(),
-//                        this, auth.getLogin(), encodedPassword);
-//                } else {
-//                    message = new MsgGetUser(getAddress(), context.getDbAddress(), action.getUuid(), session.getId(),
-//                        this, auth.getLogin(), encodedPassword);
-//                }
+                if (SIGNUP_ACTION.equals(action.getAction())) {
+                    SignupMsg signupMsg = new SignupMsg(action.getUuid(), auth.getLogin(), encodedPassword);
+                    signupMsg.setFrom(address);
+                    signupMsg.setTo(new Address(ClientType.DB_SERVICE));
+                    client.send(signupMsg);
+                } else {
+                    SigninMsg signinMsg = new SigninMsg(action.getUuid(), auth.getLogin(), encodedPassword);
+                    signinMsg.setFrom(address);
+                    signinMsg.setTo(new Address(ClientType.DB_SERVICE));
+                    client.send(signinMsg);
+                }
                 break;
-//            case CLIENT_MESSAGE_ACTION:
-//                MessageAction clientMessage = (MessageAction) action;
-//                message = new MsgSaveMessage(getAddress(), context.getDbAddress(), action.getUuid(), session.getId(),
-//                    this, clientMessage.getMessage(), registry.getUserId(session.getId()));
-//                break;
+            case CLIENT_MESSAGE_ACTION:
+                MessageAction clientMessage = (MessageAction) action;
+                SendMessageMsg sendMessageMsg = new SendMessageMsg(action.getUuid(), clientMessage.getMessage(), registry.getUserId(session.getId()));
+                sendMessageMsg.setFrom(address);
+                sendMessageMsg.setTo(new Address(ClientType.DB_SERVICE));
+                client.send(sendMessageMsg);
+                break;
             default:
                 throw new WebSocketError(ErrorCode.UNSUPPORTED_ACTION);
         }
-//        sendMessage(message);
     }
 
     @Override
@@ -203,7 +225,7 @@ public class FrontendServiceImpl extends TextWebSocketHandler implements Fronten
         }
     }
 
-    private ErrorAction prepareErrorAction(WebSocketError e, String uuid) {
+    private ErrorAction prepareErrorAction(Throwable e, String uuid) {
         ErrorAction error;
         if (e.getCause() != null) {
             String trace = getStackTrace(e.getCause());

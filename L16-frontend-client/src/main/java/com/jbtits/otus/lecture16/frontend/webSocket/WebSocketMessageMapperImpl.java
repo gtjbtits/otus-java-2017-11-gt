@@ -8,6 +8,7 @@ import com.jbtits.otus.lecture16.frontend.webSocket.messages.Action;
 import com.jbtits.otus.lecture16.frontend.webSocket.messages.AuthAction;
 import com.jbtits.otus.lecture16.frontend.webSocket.messages.MessageAction;
 import com.jbtits.otus.lecture16.frontend.webSocket.messages.SuccessAction;
+import com.jbtits.otus.lecture16.ms.messages.error.ErrorCode;
 import com.jbtits.otus.lecture16.ms.utils.ArrayUtils;
 import com.jbtits.otus.lecture16.ms.utils.reflection.ReflectionUtils;
 import com.jbtits.otus.lecture16.ms.utils.reflection.SimpleField;

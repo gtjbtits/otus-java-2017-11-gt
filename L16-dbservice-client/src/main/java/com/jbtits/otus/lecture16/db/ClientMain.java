@@ -1,15 +1,20 @@
 package com.jbtits.otus.lecture16.db;
 
+import com.jbtits.otus.lecture16.db.cache.CacheServiceImpl;
+import com.jbtits.otus.lecture16.db.dbService.DBService;
+import com.jbtits.otus.lecture16.db.dbService.DBServiceHibernateImpl;
 import com.jbtits.otus.lecture16.ms.app.Address;
 import com.jbtits.otus.lecture16.ms.app.ClientType;
 import com.jbtits.otus.lecture16.ms.app.Msg;
 import com.jbtits.otus.lecture16.ms.app.MsgWorker;
 import com.jbtits.otus.lecture16.ms.channel.ClientSocketMsgWorker;
 import com.jbtits.otus.lecture16.ms.channel.SocketMsgWorker;
-import com.jbtits.otus.lecture16.ms.messages.HandshakeMsg;
-import com.jbtits.otus.lecture16.ms.messages.HandshakeResponseMsg;
-import com.jbtits.otus.lecture16.ms.messages.SignupMsg;
-import com.jbtits.otus.lecture16.ms.messages.SignupResponseMsg;
+import com.jbtits.otus.lecture16.ms.dataSets.DataSet;
+import com.jbtits.otus.lecture16.ms.dataSets.MessageDataSet;
+import com.jbtits.otus.lecture16.ms.dataSets.UserDataSet;
+import com.jbtits.otus.lecture16.ms.messages.*;
+import com.jbtits.otus.lecture16.ms.messages.error.ErrorCode;
+import com.jbtits.otus.lecture16.ms.messages.error.ErrorMsg;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -32,18 +37,76 @@ public class ClientMain {
     private Address address;
     private Map<Class<? extends Msg>, BiConsumer<Msg, MsgWorker>> handlers;
 
+    private final DBService dbService;
+
     public ClientMain() {
         address = new Address(ClientType.DB_SERVICE);
         handlers = new HashMap<>();
+        dbService = new DBServiceHibernateImpl(new CacheServiceImpl<String, DataSet>(1000, 1000));
 
         handlers.put(SignupMsg.class, handleSignup());
+        handlers.put(SigninMsg.class, handleSignin());
+        handlers.put(SendMessageMsg.class, handleSendMessage());
     }
 
     private BiConsumer<Msg, MsgWorker> handleSignup() {
         return (message, client) -> {
-            SignupResponseMsg signupResponseMsg = new SignupResponseMsg(message.getUuid(), true);
-            signupResponseMsg.setTo(new Address(ClientType.FRONTEND_SERVICE));
+            SignupMsg signupMsg = (SignupMsg) message;
+            if (dbService.getUserByName(signupMsg.getLogin()) != null) {
+                ErrorMsg errorMsg = new ErrorMsg(message.getUuid(), new Exception(ErrorCode.DB_USER_ALREADY_EXISTS.toString()));
+                errorMsg.setFrom(address);
+                errorMsg.setTo(message.getFrom());
+                client.send(errorMsg);
+                return;
+            }
+            UserDataSet user = new UserDataSet();
+            user.setName(signupMsg.getLogin());
+            user.setPassword(signupMsg.getPassword());
+            dbService.saveUser(user);
+            SignupResponseMsg signupResponseMsg = new SignupResponseMsg(message.getUuid(), user.getId());
+            signupResponseMsg.setTo(message.getFrom());
+            signupResponseMsg.setFrom(address);
             client.send(signupResponseMsg);
+        };
+    }
+
+    private BiConsumer<Msg, MsgWorker> handleSendMessage() {
+        return (message, client) -> {
+            SendMessageMsg sendMessageMsg = (SendMessageMsg) message;
+            MessageDataSet messageDataSet = new MessageDataSet();
+            messageDataSet.setText(sendMessageMsg.getText());
+            dbService.saveMessage(messageDataSet, sendMessageMsg.getUserId());
+
+            BroadcastMessageMsg broadcastMessageMsg = new BroadcastMessageMsg(message.getUuid(), messageDataSet.getText(),
+                messageDataSet.getUser().getName(), messageDataSet.getCreated());
+            broadcastMessageMsg.setTo(message.getFrom());
+            broadcastMessageMsg.setFrom(address);
+            client.send(broadcastMessageMsg);
+        };
+    }
+
+    private BiConsumer<Msg, MsgWorker> handleSignin() {
+        return (message, client) -> {
+            SigninMsg signinMsg = (SigninMsg) message;
+            UserDataSet user = dbService.getUserByName(signinMsg.getLogin());
+            if (user == null) {
+                ErrorMsg errorMsg = new ErrorMsg(message.getUuid(), new Exception(ErrorCode.DB_USER_NOT_FOUND.toString()));
+                errorMsg.setFrom(address);
+                errorMsg.setTo(message.getFrom());
+                client.send(errorMsg);
+                return;
+            }
+            if (!user.getPassword().equals(signinMsg.getPassword())) {
+                ErrorMsg errorMsg = new ErrorMsg(message.getUuid(), new Exception(ErrorCode.DB_USER_PASSWORD_MISMATCH.toString()));
+                errorMsg.setFrom(address);
+                errorMsg.setTo(message.getFrom());
+                client.send(errorMsg);
+                return;
+            }
+            SigninResponseMsg signinResponseMsg = new SigninResponseMsg(message.getUuid(), user.getId());
+            signinResponseMsg.setTo(message.getFrom());
+            signinResponseMsg.setFrom(address);
+            client.send(signinResponseMsg);
         };
     }
 
@@ -95,7 +158,7 @@ public class ClientMain {
             }
         });
 
-        Thread.sleep(60_000);
+        Thread.sleep(1_000_000);
         client.close();
         executorService.shutdown();
     }

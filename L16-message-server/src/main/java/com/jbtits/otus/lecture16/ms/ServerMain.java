@@ -40,7 +40,14 @@ public class ServerMain {
     private void startClient(ScheduledExecutorService executorService, String command) {
         executorService.schedule(() -> {
             try {
-                new ProcessRunnerImpl().start(command);
+                ProcessRunner pr = new ProcessRunnerImpl();
+                pr.start(command);
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                System.out.println(pr.getOutput());
             } catch (IOException e) {
                 logger.log(Level.SEVERE, e.getMessage());
             }

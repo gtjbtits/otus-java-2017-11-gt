@@ -2,11 +2,11 @@ package com.jbtits.otus.lecture16.ms.messages;
 
 import com.jbtits.otus.lecture16.ms.app.Msg;
 
-public class SignupResponseMsg extends Msg {
+public class SigninResponseMsg extends Msg {
     private final long userId;
 
-    public SignupResponseMsg(String uuid, long userId) {
-        super(SignupResponseMsg.class, uuid);
+    public SigninResponseMsg(String uuid, long userId) {
+        super(SigninResponseMsg.class, uuid);
         this.userId = userId;
     }
 

@@ -10,7 +10,7 @@ import java.util.Date;
 public interface FrontendService extends WebSocketHandler {
     void init();
 
-    void registerUser(long userId, String uuid, String sessionId);
+    void registerUser(long userId, String uuid);
 
     void broadcastMessageToClients(String uuid, String sessionId, String message, String userName, Date created);
 }

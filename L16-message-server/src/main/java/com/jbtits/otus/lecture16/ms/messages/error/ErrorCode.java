@@ -1,4 +1,4 @@
-package com.jbtits.otus.lecture16.frontend.webSocket;
+package com.jbtits.otus.lecture16.ms.messages.error;
 
 public enum ErrorCode {
     WS_SESSION_CLOSED(402),
