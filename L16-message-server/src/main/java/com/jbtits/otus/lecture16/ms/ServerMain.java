@@ -1,23 +1,23 @@
 package com.jbtits.otus.lecture16.ms;
 
 import com.jbtits.otus.lecture16.ms.app.ProcessRunner;
+import com.jbtits.otus.lecture16.ms.config.MSServerConfiguration;
 import com.jbtits.otus.lecture16.ms.runner.ProcessRunnerImpl;
 import com.jbtits.otus.lecture16.ms.server.MirrorSocketMsgServer;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Created by tully.
  */
 public class ServerMain {
-    private static final Logger logger = Logger.getLogger(ServerMain.class.getName());
+    private static final Logger logger = LogManager.getLogger(ServerMain.class.getName());
 
-//    private static final String CLIENT_START_COMMAND = "java -jar ../L16.1.2-client/target/client.jar";
     private static final String DB_CLIENT_START_COMMAND = "java -jar C:\\projects\\otus-java-2017-11-gt\\L16-dbservice-client\\target\\dbservice-client.jar";
     private static final String FRONT_CLIENT_START_COMMAND = "cmd.exe /c copy /Y C:\\projects\\otus-java-2017-11-gt\\L16-frontend-client\\target\\frontend.war C:\\jetty\\webapps\\root.war";
     private static final int CLIENT_START_DELAY_SEC = 5;
@@ -28,11 +28,15 @@ public class ServerMain {
     }
 
     private void start() throws Exception {
+        logger.info("Starting Message Sever...");
+        MSServerConfiguration configuration = new MSServerConfiguration();
+
         ScheduledExecutorService executorService = Executors.newScheduledThreadPool(THREAD_POOL_SIZE);
 //        startClient(executorService, DB_CLIENT_START_COMMAND);
-        startClient(executorService, FRONT_CLIENT_START_COMMAND);
+//        startClient(executorService, DB_CLIENT_START_COMMAND);
+//        startClient(executorService, FRONT_CLIENT_START_COMMAND);
 
-        MirrorSocketMsgServer server = new MirrorSocketMsgServer();
+        MirrorSocketMsgServer server = new MirrorSocketMsgServer(configuration.getPort());
         server.start();
         executorService.shutdown();
     }
@@ -49,7 +53,7 @@ public class ServerMain {
                 }
                 System.out.println(pr.getOutput());
             } catch (IOException e) {
-                logger.log(Level.SEVERE, e.getMessage());
+                logger.error(e.getMessage());
             }
         }, CLIENT_START_DELAY_SEC, TimeUnit.SECONDS);
     }

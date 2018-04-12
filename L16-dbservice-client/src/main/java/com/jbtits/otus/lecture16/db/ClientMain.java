@@ -9,13 +9,17 @@ import com.jbtits.otus.lecture16.ms.app.Msg;
 import com.jbtits.otus.lecture16.ms.app.MsgWorker;
 import com.jbtits.otus.lecture16.ms.channel.ClientSocketMsgWorker;
 import com.jbtits.otus.lecture16.ms.channel.SocketMsgWorker;
+import com.jbtits.otus.lecture16.ms.config.MSClientConfiguration;
 import com.jbtits.otus.lecture16.ms.dataSets.DataSet;
 import com.jbtits.otus.lecture16.ms.dataSets.MessageDataSet;
 import com.jbtits.otus.lecture16.ms.dataSets.UserDataSet;
 import com.jbtits.otus.lecture16.ms.messages.*;
 import com.jbtits.otus.lecture16.ms.messages.error.ErrorCode;
 import com.jbtits.otus.lecture16.ms.messages.error.ErrorMsg;
+import com.jbtits.otus.lecture16.ms.utils.ExceptionUtils;
+import org.apache.logging.log4j.LogManager;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -28,7 +32,7 @@ import java.util.logging.Logger;
  * Created by tully.
  */
 public class ClientMain {
-    private static final Logger logger = Logger.getLogger(ClientMain.class.getName());
+    private static final org.apache.logging.log4j.Logger logger = LogManager.getLogger(ClientMain.class.getName());
 
     private static final String HOST = "localhost";
     private static final int PORT = 5050;
@@ -47,6 +51,19 @@ public class ClientMain {
         handlers.put(SignupMsg.class, handleSignup());
         handlers.put(SigninMsg.class, handleSignin());
         handlers.put(SendMessageMsg.class, handleSendMessage());
+    }
+
+    public void shutdown() {
+        dbService.shutdown();
+    }
+
+    private RuntimeException fatalError(String message, Throwable cause) {
+        shutdown();
+        return ExceptionUtils.fatalError(message, cause);
+    }
+
+    private RuntimeException fatalError(String message) {
+        return fatalError(message, null);
     }
 
     private BiConsumer<Msg, MsgWorker> handleSignup() {
@@ -124,12 +141,18 @@ public class ClientMain {
             e.printStackTrace();
         }
         address = handshakeResponse.getAddress();
-        logger.log(Level.INFO, "Client registered: " + address.getUuid());
+        logger.info("Client registered: " + address.getUuid());
     }
 
     @SuppressWarnings("InfiniteLoopStatement")
-    private void start() throws Exception {
-        SocketMsgWorker client = new ClientSocketMsgWorker(HOST, PORT);
+    private void start() {
+        MSClientConfiguration msConfig = new MSClientConfiguration();
+        final SocketMsgWorker client;
+        try {
+            client = new ClientSocketMsgWorker(msConfig.getServerHost(), msConfig.getServerPort());
+        } catch (IOException e) {
+            throw fatalError("Unable connect to server " + msConfig.getServerHost() + ":" + msConfig.getServerPort());
+        }
         client.init();
 
         handshake(client);
@@ -139,7 +162,7 @@ public class ClientMain {
             try {
                 while (true) {
                     Msg msg = client.take();
-                    logger.log(Level.INFO, "Message taken " + msg.getUuid());
+                    logger.info("Message taken " + msg.getUuid());
                     Class<? extends Msg> clazz = Msg.class;
                     try {
                         clazz = (Class<? extends Msg>) Class.forName(msg.getClassName());
@@ -154,12 +177,16 @@ public class ClientMain {
                     }
                 }
             } catch (InterruptedException e) {
-                logger.log(Level.SEVERE, e.getMessage());
+                logger.error(e.getMessage());
             }
         });
 
-        Thread.sleep(1_000_000);
-        client.close();
+        try {
+            Thread.sleep(1_000_000);
+            client.close();
+        } catch (InterruptedException | IOException e) {
+            e.printStackTrace();
+        }
         executorService.shutdown();
     }
 

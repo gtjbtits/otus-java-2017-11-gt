@@ -108,11 +108,7 @@ public class DBServiceHibernateImpl extends CacheableDBService implements DBServ
 
     @Override
     public void shutdown() {
-
-    }
-
-    @Override
-    public void close() {
+        super.shutdown();
         try {
             sessionFactory.close();
         } catch (Exception e) {

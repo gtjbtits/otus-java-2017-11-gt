@@ -4,7 +4,7 @@ import com.jbtits.otus.lecture16.ms.dataSets.UserDataSet;
 import com.jbtits.otus.lecture16.ms.dataSets.DataSet;
 import com.jbtits.otus.lecture16.ms.dataSets.MessageDataSet;
 
-public interface DBService extends AutoCloseable {
+public interface DBService {
 
     public void init();
 

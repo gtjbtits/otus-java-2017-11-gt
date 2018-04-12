@@ -7,7 +7,11 @@ import com.jbtits.otus.lecture16.frontend.webSocket.WebSocketMessageMapper;
 import com.jbtits.otus.lecture16.frontend.webSocket.WebSocketMessageMapperImpl;
 import com.jbtits.otus.lecture16.frontend.webSocket.WebSocketSessionsRegistry;
 import com.jbtits.otus.lecture16.frontend.webSocket.WebSocketSessionsRegistryImpl;
+import com.jbtits.otus.lecture16.ms.ServerMain;
 import com.jbtits.otus.lecture16.ms.channel.ClientSocketMsgWorker;
+import com.jbtits.otus.lecture16.ms.config.MSClientConfiguration;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -22,6 +26,8 @@ import java.io.IOException;
 @EnableWebSocket
 @ComponentScan({"com.jbtits.otus.lecture16.frontend"})
 public class AppConfiguration implements WebSocketConfigurer {
+    private static final Logger logger = LogManager.getLogger(AppConfiguration.class.getName());
+
     @PostConstruct
     public void startMessageSystem() {
         frontendService().init();
@@ -54,10 +60,11 @@ public class AppConfiguration implements WebSocketConfigurer {
 
     @Bean
     public ClientSocketMsgWorker clientSocketMsgWorker() {
+        MSClientConfiguration msConfig = new MSClientConfiguration();
         try {
-            return new ClientSocketMsgWorker("localhost", 5050);
+            return new ClientSocketMsgWorker(msConfig.getServerHost(), msConfig.getServerPort());
         } catch (IOException e) {
-            throw new RuntimeException("Unable to connect to server");
+            throw new RuntimeException("Unable to connect to server", e);
         }
     }
 }

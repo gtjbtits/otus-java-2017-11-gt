@@ -34,4 +34,8 @@ abstract public class CacheableDBService {
         }
         return element.getValue();
     }
+
+    protected void shutdown() {
+        cacheService.shutdown();
+    }
 }
