@@ -42,4 +42,14 @@ public abstract class Msg {
     public void setTo(Address to) {
         this.to = to;
     }
+
+    @Override
+    public String toString() {
+        return "Msg{" +
+                "className='" + className + '\'' +
+                ", uuid='" + uuid + '\'' +
+                ", from=" + from +
+                ", to=" + to +
+                '}';
+    }
 }

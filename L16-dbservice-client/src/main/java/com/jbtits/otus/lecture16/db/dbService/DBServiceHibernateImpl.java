@@ -1,5 +1,6 @@
 package com.jbtits.otus.lecture16.db.dbService;
 
+import com.jbtits.otus.lecture16.db.ClientMain;
 import com.jbtits.otus.lecture16.db.cache.CacheService;
 import com.jbtits.otus.lecture16.db.dbService.dao.MessageDataSetDAO;
 import com.jbtits.otus.lecture16.db.dbService.dao.UserDataSetDAO;
@@ -7,6 +8,9 @@ import com.jbtits.otus.lecture16.db.dbService.executor.SessionExecutor;
 import com.jbtits.otus.lecture16.ms.dataSets.UserDataSet;
 import com.jbtits.otus.lecture16.ms.dataSets.DataSet;
 import com.jbtits.otus.lecture16.ms.dataSets.MessageDataSet;
+import com.jbtits.otus.lecture16.ms.utils.ExceptionUtils;
+import org.apache.logging.log4j.LogManager;
+import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
@@ -16,35 +20,30 @@ import org.hibernate.service.ServiceRegistry;
 import java.util.function.Function;
 
 public class DBServiceHibernateImpl extends CacheableDBService implements DBService {
+    private static final org.apache.logging.log4j.Logger logger = LogManager.getLogger(DBServiceHibernateImpl.class.getName());
+
     private final SessionFactory sessionFactory;
     private SessionExecutor executor;
 
     public DBServiceHibernateImpl(CacheService cacheService) {
         super(cacheService);
-        sessionFactory = createSessionFactory(getConfiguration());
+        try {
+            sessionFactory = createSessionFactory(getConfiguration());
+        } catch (HibernateException e) {
+            super.shutdown();
+            throw ExceptionUtils.fatalError("Hibernate misconfigurated", e);
+        }
         executor = new SessionExecutor(sessionFactory);
     }
 
     private Configuration getConfiguration() {
         Configuration configuration = new Configuration();
-
         configuration.addAnnotatedClass(UserDataSet.class);
         configuration.addAnnotatedClass(MessageDataSet.class);
-
-        configuration.setProperty("hibernate.dialect", "org.hibernate.dialect.H2Dialect");
-        configuration.setProperty("hibernate.connection.driver_class", "org.h2.Driver");
-        configuration.setProperty("hibernate.connection.url", "jdbc:h2:mem:hw10");
-        configuration.setProperty("hibernate.connection.username", "sa");
-        configuration.setProperty("hibernate.connection.password", "");
-        configuration.setProperty("hibernate.show_sql", "true");
-        configuration.setProperty("hibernate.hbm2ddl.auto", "create");
-        configuration.setProperty("hibernate.connection.useSSL", "false");
-        configuration.setProperty("hibernate.enable_lazy_load_no_trans", "true");
-
         return configuration;
     }
 
-    private static SessionFactory createSessionFactory(Configuration configuration) {
+    private static SessionFactory createSessionFactory(Configuration configuration) throws HibernateException {
         StandardServiceRegistryBuilder builder = new StandardServiceRegistryBuilder();
         builder.applySettings(configuration.getProperties());
         ServiceRegistry serviceRegistry = builder.build();

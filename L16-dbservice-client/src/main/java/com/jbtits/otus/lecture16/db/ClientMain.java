@@ -33,11 +33,6 @@ import java.util.logging.Logger;
  */
 public class ClientMain {
     private static final org.apache.logging.log4j.Logger logger = LogManager.getLogger(ClientMain.class.getName());
-
-    private static final String HOST = "localhost";
-    private static final int PORT = 5050;
-    private static final int PAUSE_MS = 5000;
-    private static final int MAX_MESSAGES_COUNT = 10;
     private Address address;
     private Map<Class<? extends Msg>, BiConsumer<Msg, MsgWorker>> handlers;
 
@@ -127,7 +122,7 @@ public class ClientMain {
         };
     }
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         new ClientMain().start();
     }
 
@@ -162,32 +157,34 @@ public class ClientMain {
             try {
                 while (true) {
                     Msg msg = client.take();
-                    logger.info("Message taken " + msg.getUuid());
+                    logger.info("Incoming message [" + msg.getUuid() + "]");
+                    logger.debug(msg);
                     Class<? extends Msg> clazz = Msg.class;
                     try {
                         clazz = (Class<? extends Msg>) Class.forName(msg.getClassName());
                     } catch (ClassNotFoundException e) {
-                        System.out.println("Bad class in Msg className");
-                        e.printStackTrace();
+                        logger.warn("Skip message with unknown class: " + msg.getClassName(), e);
+                        logger.debug(msg);
+                        continue;
                     }
                     if (handlers.containsKey(clazz)) {
                         handlers.get(clazz).accept(msg, client);
                     } else {
-                        System.out.println("Unknown message received: " + msg.toString());
+                        logger.warn("No handler for message with class: " + msg.getClassName());
+                        logger.debug(msg);
                     }
                 }
             } catch (InterruptedException e) {
-                logger.error(e.getMessage());
+                logger.error("ExecutorService interrupted", e);
             }
         });
 
-        try {
-            Thread.sleep(1_000_000);
-            client.close();
-        } catch (InterruptedException | IOException e) {
-            e.printStackTrace();
-        }
-        executorService.shutdown();
+//        try {
+//            client.close();
+//        } catch (IOException e) {
+//            logger.error("Error at closing client connection", e);
+//        }
+//        executorService.shutdown();
     }
 
 }
