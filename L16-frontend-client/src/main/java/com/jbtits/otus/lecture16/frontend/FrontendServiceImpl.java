@@ -36,7 +36,10 @@ public class FrontendServiceImpl extends TextWebSocketHandler implements Fronten
     private final SecurityService security;
     private final ClientSocketMsgWorker client;
 
+    // move to msg worker
     private Address address;
+
+    // move to msgworker
     private Map<Class<? extends Msg>, BiConsumer<Msg, MsgWorker>> handlers;
 
     public FrontendServiceImpl(WebSocketSessionsRegistry registry, WebSocketMessageMapper mapper,
@@ -91,6 +94,7 @@ public class FrontendServiceImpl extends TextWebSocketHandler implements Fronten
         };
     }
 
+    // move to msgworker
     private void handshake(MsgWorker client) {
         Msg handshake = new HandshakeMsg("handshake", address.getType());
         client.send(handshake);
@@ -104,6 +108,7 @@ public class FrontendServiceImpl extends TextWebSocketHandler implements Fronten
         System.out.println("Client registered: " + address.getUuid());
     }
 
+    // move to msg worker
     private void startClientReciever() {
         ExecutorService executorService = Executors.newSingleThreadExecutor();
         executorService.submit(() -> {

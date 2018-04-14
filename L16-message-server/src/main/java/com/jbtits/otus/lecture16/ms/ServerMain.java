@@ -3,7 +3,7 @@ package com.jbtits.otus.lecture16.ms;
 import com.jbtits.otus.lecture16.ms.app.ProcessRunner;
 import com.jbtits.otus.lecture16.ms.config.MSServerConfiguration;
 import com.jbtits.otus.lecture16.ms.runner.ProcessRunnerImpl;
-import com.jbtits.otus.lecture16.ms.server.MirrorSocketMsgServer;
+import com.jbtits.otus.lecture16.ms.server.MessageExchangeServer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -36,7 +36,7 @@ public class ServerMain {
 //        startClient(executorService, DB_CLIENT_START_COMMAND);
 //        startClient(executorService, FRONT_CLIENT_START_COMMAND);
 
-        MirrorSocketMsgServer server = new MirrorSocketMsgServer(configuration.getPort());
+        MessageExchangeServer server = new MessageExchangeServer(configuration.getPort());
         server.start();
         executorService.shutdown();
     }

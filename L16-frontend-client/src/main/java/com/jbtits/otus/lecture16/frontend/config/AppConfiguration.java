@@ -22,6 +22,8 @@ import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry
 import javax.annotation.PostConstruct;
 import java.io.IOException;
 
+import static com.jbtits.otus.lecture16.ms.utils.ExceptionUtils.fatalError;
+
 @Configuration
 @EnableWebSocket
 @ComponentScan({"com.jbtits.otus.lecture16.frontend"})
@@ -64,7 +66,7 @@ public class AppConfiguration implements WebSocketConfigurer {
         try {
             return new ClientSocketMsgWorker(msConfig.getServerHost(), msConfig.getServerPort());
         } catch (IOException e) {
-            throw new RuntimeException("Unable to connect to server", e);
+            throw fatalError("Unable connect to server " + msConfig.getServerHost() + ":" + msConfig.getServerPort());
         }
     }
 }
