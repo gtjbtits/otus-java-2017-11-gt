@@ -10,7 +10,7 @@ public abstract class Msg {
 
     private final String uuid;
 
-    private Address from;
+    private ClientAddress from;
 
     private Address to;
 
@@ -27,7 +27,7 @@ public abstract class Msg {
         return className;
     }
 
-    public Address getFrom() {
+    public ClientAddress getFrom() {
         return from;
     }
 
@@ -35,7 +35,7 @@ public abstract class Msg {
         return to;
     }
 
-    public void setFrom(Address from) {
+    public void setFrom(ClientAddress from) {
         this.from = from;
     }
 

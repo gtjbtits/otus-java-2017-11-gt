@@ -10,12 +10,16 @@ public class ClientSocketMsgWorker extends SocketMsgWorker {
 
     private final Socket socket;
 
-    public ClientSocketMsgWorker(String host, int port) throws IOException {
-        this(new Socket(host, port));
+    protected ClientSocketMsgWorker(String host, int port, int additionalWorkersCount) throws IOException {
+        this(new Socket(host, port), additionalWorkersCount);
     }
 
-    private ClientSocketMsgWorker(Socket socket) throws IOException {
-        super(socket);
+    public ClientSocketMsgWorker(String host, int port) throws IOException {
+        this(new Socket(host, port), 0);
+    }
+
+    private ClientSocketMsgWorker(Socket socket, int additionalWorkersCount) throws IOException {
+        super(socket, additionalWorkersCount);
         this.socket = socket;
     }
 

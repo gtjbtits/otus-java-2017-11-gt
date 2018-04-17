@@ -3,6 +3,7 @@ package com.jbtits.otus.lecture16.ms.channel;
 import com.jbtits.otus.lecture16.ms.app.Msg;
 import com.jbtits.otus.lecture16.ms.app.MsgWorker;
 import com.google.gson.Gson;
+import com.jbtits.otus.lecture16.ms.app.Shutdownable;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -22,19 +23,23 @@ import java.util.logging.Logger;
 /**
  * Created by tully.
  */
-public class SocketMsgWorker implements MsgWorker {
+public class SocketMsgWorker extends Shutdownable implements MsgWorker {
     private static final Logger logger = Logger.getLogger(SocketMsgWorker.class.getName());
     private static final int WORKERS_COUNT = 2;
 
     private final BlockingQueue<Msg> output = new LinkedBlockingQueue<>();
     private final BlockingQueue<Msg> input = new LinkedBlockingQueue<>();
 
-    private final ExecutorService executor;
+    protected final ExecutorService executor;
     private final Socket socket;
 
-    public SocketMsgWorker(Socket socket) {
+    protected SocketMsgWorker(Socket socket, int additionalWorkersCount) {
         this.socket = socket;
-        this.executor = Executors.newFixedThreadPool(WORKERS_COUNT);
+        this.executor = Executors.newFixedThreadPool(WORKERS_COUNT + additionalWorkersCount);
+    }
+
+    public SocketMsgWorker(Socket socket) {
+        this(socket, WORKERS_COUNT);
     }
 
     @Override
@@ -72,7 +77,7 @@ public class SocketMsgWorker implements MsgWorker {
                 out.println();//line with json + an empty line
             }
         } catch (InterruptedException | IOException e) {
-            logger.log(Level.SEVERE, e.getMessage());
+            shutdown("Send messages thread has been failed", e);
         }
     }
 
@@ -91,10 +96,8 @@ public class SocketMsgWorker implements MsgWorker {
                     stringBuilder = new StringBuilder();
                 }
             }
-        } catch (IOException | ParseException e) {
-            logger.log(Level.SEVERE, e.getMessage());
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
+        } catch (ClassNotFoundException | IOException | ParseException e) {
+            shutdown("Receive messages thread has been failed", e);
         }
     }
 
@@ -104,5 +107,10 @@ public class SocketMsgWorker implements MsgWorker {
         String className = (String) jsonObject.get(Msg.CLASS_NAME_VARIABLE);
         Class<?> msgClass = Class.forName(className);
         return (Msg) new Gson().fromJson(json, msgClass);
+    }
+
+    @Override
+    public void onShutdown() {
+        close();
     }
 }
