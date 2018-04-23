@@ -1,0 +1,39 @@
+[0.023s][info][gc] Using Parallel
+[35.663s][info][gc] GC(0) Pause Young (Allocation Failure) 128M->62M(491M) 242.748ms
+[72.232s][info][gc] GC(1) Pause Young (Allocation Failure) 190M->127M(491M) 292.058ms
+[109.702s][info][gc] GC(2) Pause Young (Allocation Failure) 256M->190M(491M) 268.224ms
+[147.034s][info][gc] GC(3) Pause Young (Allocation Failure) 318M->255M(491M) 275.053ms
+[185.561s][info][gc] GC(4) Pause Young (Allocation Failure) 384M->320M(488M) 262.810ms
+[189.733s][info][gc] GC(5) Pause Full (Ergonomics) 320M->317M(420M) 4171.773ms
+[207.275s][info][gc] GC(6) Pause Full (Ergonomics) 375M->347M(455M) 1422.359ms
+[224.031s][info][gc] GC(7) Pause Full (Ergonomics) 398M->372M(420M) 1675.537ms
+[233.675s][info][gc] GC(8) Pause Full (Ergonomics) 398M->385M(455M) 1595.713ms
+[239.363s][info][gc] GC(9) Pause Full (Ergonomics) 398M->392M(420M) 1666.522ms
+[243.075s][info][gc] GC(10) Pause Full (Ergonomics) 398M->395M(455M) 1689.145ms
+[245.727s][info][gc] GC(11) Pause Full (Ergonomics) 398M->397M(420M) 1653.839ms
+[247.415s][info][gc] GC(12) Pause Full (Ergonomics) 398M->398M(455M) 1687.430ms
+[249.182s][info][gc] GC(13) Pause Full (Ergonomics) 398M->398M(420M) 1766.067ms
+[250.894s][info][gc] GC(14) Pause Full (Ergonomics) 398M->398M(455M) 1711.673ms
+[252.489s][info][gc] GC(15) Pause Full (Ergonomics) 398M->398M(420M) 1593.591ms
+[254.156s][info][gc] GC(16) Pause Full (Ergonomics) 398M->398M(455M) 1666.944ms
+[255.854s][info][gc] GC(17) Pause Full (Ergonomics) 398M->398M(420M) 1697.031ms
+[257.495s][info][gc] GC(18) Pause Full (Ergonomics) 398M->398M(455M) 1640.976ms
+[259.174s][info][gc] GC(19) Pause Full (Ergonomics) 398M->398M(420M) 1678.080ms
+[260.805s][info][gc] GC(20) Pause Full (Ergonomics) 398M->398M(455M) 1630.014ms
+[262.478s][info][gc] GC(21) Pause Full (Ergonomics) 398M->398M(420M) 1672.970ms
+[264.193s][info][gc] GC(22) Pause Full (Ergonomics) 398M->398M(455M) 1713.850ms
+[265.886s][info][gc] GC(23) Pause Full (Ergonomics) 398M->398M(420M) 1692.436ms
+[267.565s][info][gc] GC(24) Pause Full (Ergonomics) 398M->398M(455M) 1678.708ms
+[269.281s][info][gc] GC(25) Pause Full (Ergonomics) 398M->398M(420M) 1715.206ms
+[270.987s][info][gc] GC(26) Pause Full (Ergonomics) 398M->398M(455M) 1705.279ms
+[272.783s][info][gc] GC(27) Pause Full (Ergonomics) 398M->398M(420M) 1795.643ms
+[274.627s][info][gc] GC(28) Pause Full (Ergonomics) 398M->398M(455M) 1842.545ms
+[276.457s][info][gc] GC(29) Pause Full (Ergonomics) 398M->398M(420M) 1829.677ms
+[278.200s][info][gc] GC(30) Pause Full (Ergonomics) 398M->398M(455M) 1741.595ms
+[279.856s][info][gc] GC(31) Pause Full (Ergonomics) 398M->398M(420M) 1656.012ms
+[281.490s][info][gc] GC(32) Pause Full (Ergonomics) 398M->398M(455M) 1633.497ms
+[283.216s][info][gc] GC(33) Pause Full (Ergonomics) 398M->398M(420M) 1724.752ms
+[284.822s][info][gc] GC(34) Pause Full (Ergonomics) 398M->398M(455M) 1605.616ms
+[286.518s][info][gc] GC(35) Pause Full (Ergonomics) 398M->398M(420M) 1695.201ms
+[288.212s][info][gc] GC(36) Pause Full (Allocation Failure) 398M->398M(455M) 1693.151ms
+[288.242s][info][gc] GC(37) Pause Full (Ergonomics) 398M->0M(285M) 29.503ms
