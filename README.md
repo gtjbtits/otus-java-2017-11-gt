@@ -30,6 +30,20 @@ mvn test
 ### L04: GC Test
 Run `start.bat`
 
+### L05: Test suite
+Build:
+```bash
+cd L05
+mvn clean package
+```
+Run:
+```bash
+# For package tests
+java -jar target\gt-lecture5.jar package
+# For signle class tests
+java -jar target\gt-lecture5.jar
+```
+
 Test results:
 
 #### G1 (-XX:+UseG1GC)
