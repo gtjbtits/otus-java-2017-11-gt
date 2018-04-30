@@ -30,20 +30,6 @@ mvn test
 ### L04: GC Test
 Run `start.bat`
 
-### L05: Test suite
-Build:
-```bash
-cd L05
-mvn clean package
-```
-Run:
-```bash
-# For package tests
-java -jar target\gt-lecture5.jar package
-# For signle class tests
-java -jar target\gt-lecture5.jar
-```
-
 Test results:
 
 #### G1 (-XX:+UseG1GC)
@@ -80,6 +66,20 @@ Test results:
 `Parallel` and `Serial` have a similar result: young scavenge 1-4m and old scavenge 4-5m. World stop pauses are very noticeable.
 
 \* - each test was completed in about 5 minutes, but for different collectors a different step of memory leakage was used
+
+### L05: Test suite
+Build:
+```bash
+cd L05
+mvn clean package
+```
+Run:
+```bash
+# For package tests
+java -jar target\gt-lecture5.jar package
+# For signle class tests
+java -jar target\gt-lecture5.jar
+```
 
 ### L06
 ```bash
